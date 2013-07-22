@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-------------------------------------------------------------------------------
-# Author:	Peter McGowan (pemcg@redhat.com)
+# Author:   Peter McGowan (pemcg@redhat.com)
 #           Copyright 2013 Peter McGowan, Red Hat 
 
 #  This program is free software: you can redistribute it and/or modify
@@ -22,40 +22,40 @@
 #
 # Revision History
 #
-# Original		1.0		06-Jul-05
-# 				1.1 	26-Jul-05   Added threshold checking for disk utilisation page
-# 				1.2 	28-Jul-05   Colour code the headings according to thresholds reached in column
-# 				1.3 	07-Sep-05   Allow for the date in the sar file to be dd/mm/yyyy or dd-mm-yyyy
-#				1.4		27-Sep-05   Shorten tab title for Multi-Data I/O statistics
-#				1.5		29-Sep-05   Corrected a bug in CPU data handling
-#				1.6		23-Jan-06   Added Kernel version to first sheet of report
-#				1.7		01-Mar-06   Removes spaces around '/' in xxx/Sec headings
-# 				1.8		08-Mar-07   Remove '.df' file processing for -a switch, and removed date column
-#                                 	from each sheet
-#				1.9		10-Apr-07   Added device major/minor number translation via a device map file
-#				2.0		04-Sep-07   Changed threshold measurement from >=/<= to >/<
-#				2.1		29-Apr-09   Added I/O counter translations for sa1 '-d' switch on RHEL 5
-#				2.2 	07-Jul-09   Added the ability to handle a chunks of data around a restart
-#				2.3		30-Jul-09   Changed IOWait description in %TranslateHeading
-#				2.4		31-Jul-09   Set the workbook to "compatibility_mode to stop "File Error: data may have been lost"
-#									Msgs when using thresholds files on Office 2003 SP3 and later
-#				2.5		09-Nov-09   Added some values to the TranslateHeading table and re-organised it
-#				2.6		07-May-10   changed PrintUsage wording
-#				2.7		28-Jul-10   Removed df logic and processing
-#				2.8		08-Mar-11	Changed tab titles from 'Statistics' to 'Stats'
-#				2.9     29-Mar-11   Commented out the normalisation of time seconds to .0
-#									Allowed for 12-hour clock 'AM' or 'PM' fields as column 2
-#				3.0     30-Mar-11   Added new '-b' & '-e' options to specify begin and end times to sample
-#				3.1		26-Apr-11	Added '-o' switch to select an output file name
-#				3.2		12-May-11	Bugfix of -a so that it would read sar files named other than 'sarnn'
-#				3.3		27-May-11   Changed sheet title for I/O sheets to start "IO -"
-#				4.0		20-Dec-11	Updated to cater for sysstat 7 (RHEL5 era) or sysstat 9 (RHEL6 era) format sar files, including
-#									multiple header translation tables.	Some code changes made for readability (particularly the use
-#									of symbolic constants). Thresholds and dev_map files now read from the -D location if specified.
-#				4.1		04-Mar-12	Relabeled tps as 'Total Transfers/Sec' in sar -b header translation tables, and added '-V' switch
-#				4.2		06-Mar-12	Special case 'tps' in ReadMultiStats for compatibility with GenGraphs.pl
-#				4.3		07-Mar-12	Changed the regex that identifies the first line of a sar file to include 'Linux'
-#				4.4		27-Apr-12	Bugfix of devmap file processing of ASM volumes
+# Original      1.0     06-Jul-05
+#               1.1     26-Jul-05   Added threshold checking for disk utilisation page
+#               1.2     28-Jul-05   Colour code the headings according to thresholds reached in column
+#               1.3     07-Sep-05   Allow for the date in the sar file to be dd/mm/yyyy or dd-mm-yyyy
+#               1.4     27-Sep-05   Shorten tab title for Multi-Data I/O statistics
+#               1.5     29-Sep-05   Corrected a bug in CPU data handling
+#               1.6     23-Jan-06   Added Kernel version to first sheet of report
+#               1.7     01-Mar-06   Removes spaces around '/' in xxx/Sec headings
+#               1.8     08-Mar-07   Remove '.df' file processing for -a switch, and removed date column
+#                                   from each sheet
+#               1.9     10-Apr-07   Added device major/minor number translation via a device map file
+#               2.0     04-Sep-07   Changed threshold measurement from >=/<= to >/<
+#               2.1     29-Apr-09   Added I/O counter translations for sa1 '-d' switch on RHEL 5
+#               2.2     07-Jul-09   Added the ability to handle a chunks of data around a restart
+#               2.3     30-Jul-09   Changed IOWait description in %TranslateHeading
+#               2.4     31-Jul-09   Set the workbook to "compatibility_mode to stop "File Error: data may have been lost"
+#                                   Msgs when using thresholds files on Office 2003 SP3 and later
+#               2.5     09-Nov-09   Added some values to the TranslateHeading table and re-organised it
+#               2.6     07-May-10   changed PrintUsage wording
+#               2.7     28-Jul-10   Removed df logic and processing
+#               2.8     08-Mar-11   Changed tab titles from 'Statistics' to 'Stats'
+#               2.9     29-Mar-11   Commented out the normalisation of time seconds to .0
+#                                   Allowed for 12-hour clock 'AM' or 'PM' fields as column 2
+#               3.0     30-Mar-11   Added new '-b' & '-e' options to specify begin and end times to sample
+#               3.1     26-Apr-11   Added '-o' switch to select an output file name
+#               3.2     12-May-11   Bugfix of -a so that it would read sar files named other than 'sarnn'
+#               3.3     27-May-11   Changed sheet title for I/O sheets to start "IO -"
+#               4.0     20-Dec-11   Updated to cater for sysstat 7 (RHEL5 era) or sysstat 9 (RHEL6 era) format sar files, including
+#                                   multiple header translation tables. Some code changes made for readability (particularly the use
+#                                   of symbolic constants). Thresholds and dev_map files now read from the -D location if specified.
+#               4.1     04-Mar-12   Relabeled tps as 'Total Transfers/Sec' in sar -b header translation tables, and added '-V' switch
+#               4.2     06-Mar-12   Special case 'tps' in ReadMultiStats for compatibility with GenGraphs.pl
+#               4.3     07-Mar-12   Changed the regex that identifies the first line of a sar file to include 'Linux'
+#               4.4     27-Apr-12   Bugfix of devmap file processing of ASM volumes
 #               4.5     22-Jul-13   Bugfix of maximum sheet name length being exceeded by some long network device names (eg __tmp1398450821)
 #
 use constant VERSION => 4.5;
@@ -71,31 +71,31 @@ use constant TRUE => 0x1;
 # whether or not our sar file contains that measured entity
 #
 use constant {
-	PROCESSES => "proc/s",             # Process creation
-	CONTEXT_SWITCHES => "cswch/s",	   # Context switches
-	INTERRUPTS => "intr/s",            # Interrupts
-	MEMORY_UTIL => "kbmemfree",        # Memory Utilisation
-	CPU =>"%nice",                     # CPU
-	PAGING => "pgpgin/s",              # Paging stats
-	SWAPPING => "pswpin/s",            # Swapping stats
-	IO => "bread/s",                   # Total I/O stats
-	DEV => "DEV",					   # Per-device I/O stats
-	MEMORY => "frmpg/s",               # Memory stats
-	SWAP_UTIL => "kbswpfree",          # Swap Utilisation
-	FILES => "dentunusd",              # Inode & File 
-	SOCKETS => "totsck",               # Socket stats
-	RUN_QUEUE => "runq-sz",            # Process run queue
-	NFS_CLIENT => "call/s",            # NFS Client Stats
-	NFS_SERVER => "scall/s",           # NFS Server Stats
-	NETWORK => "rxpck/s",              # Network Stats
-	NETWORK_ERRORS => "rxerr/s",       # Network Errors
-	IP => "irec/s",                    # IPv4 stats
-	IP_ERRORS => "ihdrerr/s",          # IPv4 errors
-	ICMP => "imsg/s",                  # ICMPv4 stats
-	ICMP_ERRORS => "ierr/s",           # ICMPv4 errors
-	TCP => "active/s",                 # TCPv4 stats
-	TCP_ERRORS => "atmptf/s",          # TCPv4 errors
-	UDP =>	"idgm/s",	               # UDP stats
+    PROCESSES => "proc/s",             # Process creation
+    CONTEXT_SWITCHES => "cswch/s",     # Context switches
+    INTERRUPTS => "intr/s",            # Interrupts
+    MEMORY_UTIL => "kbmemfree",        # Memory Utilisation
+    CPU =>"%nice",                     # CPU
+    PAGING => "pgpgin/s",              # Paging stats
+    SWAPPING => "pswpin/s",            # Swapping stats
+    IO => "bread/s",                   # Total I/O stats
+    DEV => "DEV",                      # Per-device I/O stats
+    MEMORY => "frmpg/s",               # Memory stats
+    SWAP_UTIL => "kbswpfree",          # Swap Utilisation
+    FILES => "dentunusd",              # Inode & File 
+    SOCKETS => "totsck",               # Socket stats
+    RUN_QUEUE => "runq-sz",            # Process run queue
+    NFS_CLIENT => "call/s",            # NFS Client Stats
+    NFS_SERVER => "scall/s",           # NFS Server Stats
+    NETWORK => "rxpck/s",              # Network Stats
+    NETWORK_ERRORS => "rxerr/s",       # Network Errors
+    IP => "irec/s",                    # IPv4 stats
+    IP_ERRORS => "ihdrerr/s",          # IPv4 errors
+    ICMP => "imsg/s",                  # ICMPv4 stats
+    ICMP_ERRORS => "ierr/s",           # ICMPv4 errors
+    TCP => "active/s",                 # TCPv4 stats
+    TCP_ERRORS => "atmptf/s",          # TCPv4 errors
+    UDP =>  "idgm/s",                  # UDP stats
 };
 #
 # -------------------- Header Translation tables --------------------------------
@@ -103,429 +103,429 @@ use constant {
 # If any values here are changed, then also change GenerateIni.pl accordingly
 #
 my %Sar7Headings = (
-			#
-			# sar -b : I/O and transfer rate stats
-			#
-			'tps' => "Transfers/Sec",
-			'rtps' => "Read Transfers/Sec",
-			'wtps' => "Write Transfers/Sec",
-			'bread/s' => "Blocks Read/Sec",
-			'bwrtn/s' => "Blocks Written/Sec",
-			#
-			# sar -B : Paging stats
-			#
-			'pgpgin/s' => "KB Paged In/Sec",
-			'pgpgout/s' => "KB Paged Out/Sec",
-			'fault/s' => "Total Page Faults/Sec",
-			'majflt/s' => "Major Faults/Sec",
-			#
-			# sar -c : process creation
-			#
-			'proc/s' => "Processes Created/Sec",
-			#
-			# sar -d : I/O activity for each block device
-			#
-			'rd_sec/s' => "Sectors Read/Sec",
-			'wr_sec/s' => "Sectors Written/Sec",
-			'avgrq-sz' => "Average Request Size (Sectors)",
-			'avgqu-sz' => "Average Queue Length",
-			'await' => "Average I/O Time inc Wait(ms)",
-			'svctm' => "Average I/O Service Time (ms)",
-			'%util' => "% Bandwidth Utilisation",
-			#
-			# sar -I SUM : Total interrupts
-			#
-		    'intr/s' => "Interrupts/Sec",
-			#
-			# sar -n DEV : Network device stats
-			#
-			'rxpck/s' => "Pkts Recv'd/Sec",
-			'txpck/s' => "Pkts Trans'd/Sec",
-			'rxbyt/s' => "Bytes Recv'd/Sec",
-			'txbyt/s' => "Bytes Trans'd/Sec",
-			'rxcmp/s' => "Compressed Pkts Recv'd/Sec",
-			'txcmp/s' => "Compressed Pkts Trans'd/Sec",
-			'rxmcst/s' => "Multicast Pkts Recv'd/Sec",
-			#
-			# sar -n EDEV : Network device errors
-			#
-			'rxerr/s' => "Bad Pkts Recv'd/Sec",
-			'txerr/s' => "Trans Errors/Sec",
-			'coll/s' => "Collisions/Sec",
-			'rxdrop/s' => "Recv Pkts Dropped/Sec",
-			'txdrop/s' => "Trans Pkts Dropped/Sec",
-			'txcarr/s' => "Trans Carrier Errors/Sec",
-			'rxfram/s' => "Recv Frame Alignment Errors/Sec",
-			'rxfifo/s' => "Recv FIFO Overrun Errors/Sec",
-			'txfifo/s' => "Trans FIFO Overrun Errors/Sec",
-			#
-			# sar -n NFS : NFS client activity
-			#
-			'call/s' => "RPC Requests Made/Sec",
-			'retrans/s' => "RPC Retransmitted Requests Made/Sec",
-			'read/s' => "RPC Read Requests Made/Sec",
-			'write/s' => "RPC Write Requests Made/Sec",
-			'access/s' => "RPC Access Requests Made/Sec",
-			'getatt/s' => "RPC Getattr Requests Made/Sec",
-			#
-			# sar -n NFSD : NFS server activity
-			#
-			'scall/s' => "RPC Requests Recv'd/Sec",
-			'badcall/s' => "Bad RPC Requests Recv'd/Sec",
-			'packet/s' => "Network Packets Recv'd/Sec",
-			'udp/s' => "UDP Packets Recv'd/Sec",
-			'tcp/s' => "TCP Packets Recv'd/Sec",
-			'hit/s' => "Reply Cache Hits/Sec",
-			'miss/s' => "Reply Cache Misses/Sec",
-			'sread/s' => "RPC Read Calls Recv'd/Sec",
-			'swrite/s' => "RPC Write Calls Recv'd/Sec",
-			'saccess/s' => "RPC Access Calls Recv'd/Sec",
-			'sgetatt/s' => "RPC Getattr Calls Recv'd/Sec",
-			#
-			# sar -n SOCK : Socket stats
-			#
-			'totsck' => "Total Used Sockets",
-			'tcpsck' => "TCP Sockets in Use",
-			'udpsck' => "UDP Sockets in Use",
-			'rawsck' => "Raw Sockets in Use",
-			'ip-frag' => "IP Fragments in Use",
-			#
-			# sar -q : Queue length & load average
-			#
-			'runq-sz' => "Run Queue Length",
-			'plist-sz' => "No. of Processes in List",
-			'ldavg-1' => "System Load Avg. Last Min.",
-			'ldavg-5' => "System Load Avg. Last 5 Mins.",
-			'ldavg-15' => "System Load Avg. Last 15 Mins.",
-			#
-			# sar -r : Memory & swap space utilisation stats
-			#
-			'kbmemfree' => "Free Memory KB",
-			'kbmemused' => "Used Memory KB",
-			'%memused' => "% Memory Used",
-			'kbbuffers' => "Kernel Buffers KB",
-			'kbcached' => "Data Cache KB",
-			'kbswpfree' => "Free Swap Space KB",
-			'kbswpused' => "Used Swap Space KB",
-			'%swpused' => "% Swap Used",
-			'kbswpcad' => "Cached Swap KB",
-			#
-			# sar -R : Memory stats
-			#
-			'frmpg/s' => "Memory Pages Freed/Sec",
-			'bufpg/s' => "Add'l Buffer Pages/Sec",
-			'campg/s' => "Add'l Cache Pages/Sec",
-			#
-			# sar -u : CPU stats
-			#
-			'%user' => "% User Level",
-			'%nice' => "% User Level (nice)",
-			'%system' => "% System Level",
-			'%iowait' => "% Idle Waiting on I/O (IOwait)",
-			'%steal' => "% Time Involuntary Waiting on Another vCPU",
-			'%idle' => "% Idle",
-		    '%utilisation' => "% Utilisation",
-			#
-			# sar -v : Files, inodes & other kernel tables
-			#
-			'dentunusd' => "Unused Directory Cache Entries",
-			'file-sz' => "Used File Handles",
-			'%file-sz' => "% Used File Handles",
-			'inode-sz' => "Used Inode Handlers",
-			'super-sz' => "Super Block Handlers",
-			'%super-sz' => "% Allocated Super Block Handlers",
-			'dquot-sz' => "Allocated Disc Quota Entries",
-			'%dquot-sz' => "% Allocated Disc Quota Entries",
-			'rtsig-sz' => "Queued RT Signals",
-			'%rtsig-sz' => "% Queued RT Signals",
-			#
-			# sar -w : Context switches
-			#
-			'cswch/s' => "Context Switches/Sec",
-			#
-			# sar -W : Swapping stats
-			#
-			'pswpin/s' => "Pages Swapped In/Sec",
-			'pswpout/s' => "Pages Swapped Out/Sec",
-			#
-			# sar -x ALL : Process stats
-			#
-			'minflt/s' => "Minor Faults/Sec",
-			'majflt/s' => "Major Faults/Sec",
-			'nswap/s' => "Process Pages Swapped Out/Sec",
-			#
-			# sar -X ALL : Child process stats
-			#			
-			'cminflt/s' => "Child Process Minor Faults/Sec",
-			'cmajflt/s' => "Child Process Major Faults/Sec",
-			'%cuser' => "Child Process % User Level",
-			'%csystem' => "Child Process % System Level",
-			'cnswap/s' => "Child Process Pages Swapped Out/Sec",
-			#
-			# sar -y : TTY device activity
-			#
-			'Recvin/s' => "Serial Line Recv Ints/Sec",
-			'xmtin/s' => "Serial Line Trans Ints/Sec",
-			'framerr/s' => "Serial Line Frame Errors/Sec",
-			'prtyerr/s' => "Serial Line Parity Errors/Sec",
-			'brk/s' => "Serial Line Breaks/Sec",
-			'ovrun/s' => "Serial Line Overruns/Sec",
-			#
-			# Legacy
-			#	       		       		       
-			'blks/s' => "Blocks Tranferred/Sec",
-			'activepg' => "Active Memory Pages",
-			'inadtypg' => "Inactive Dirty Pages",
-			'inaclnpg' => "Inactive Clean Pages",
-			'inatarpg' => "Inactive Target Pages",
-			'shmpg/s' => "Add'l Pages Shared/Sec",
-			'kbmemshrd' => "Shared Memory KB"
-			);
+            #
+            # sar -b : I/O and transfer rate stats
+            #
+            'tps' => "Transfers/Sec",
+            'rtps' => "Read Transfers/Sec",
+            'wtps' => "Write Transfers/Sec",
+            'bread/s' => "Blocks Read/Sec",
+            'bwrtn/s' => "Blocks Written/Sec",
+            #
+            # sar -B : Paging stats
+            #
+            'pgpgin/s' => "KB Paged In/Sec",
+            'pgpgout/s' => "KB Paged Out/Sec",
+            'fault/s' => "Total Page Faults/Sec",
+            'majflt/s' => "Major Faults/Sec",
+            #
+            # sar -c : process creation
+            #
+            'proc/s' => "Processes Created/Sec",
+            #
+            # sar -d : I/O activity for each block device
+            #
+            'rd_sec/s' => "Sectors Read/Sec",
+            'wr_sec/s' => "Sectors Written/Sec",
+            'avgrq-sz' => "Average Request Size (Sectors)",
+            'avgqu-sz' => "Average Queue Length",
+            'await' => "Average I/O Time inc Wait(ms)",
+            'svctm' => "Average I/O Service Time (ms)",
+            '%util' => "% Bandwidth Utilisation",
+            #
+            # sar -I SUM : Total interrupts
+            #
+            'intr/s' => "Interrupts/Sec",
+            #
+            # sar -n DEV : Network device stats
+            #
+            'rxpck/s' => "Pkts Recv'd/Sec",
+            'txpck/s' => "Pkts Trans'd/Sec",
+            'rxbyt/s' => "Bytes Recv'd/Sec",
+            'txbyt/s' => "Bytes Trans'd/Sec",
+            'rxcmp/s' => "Compressed Pkts Recv'd/Sec",
+            'txcmp/s' => "Compressed Pkts Trans'd/Sec",
+            'rxmcst/s' => "Multicast Pkts Recv'd/Sec",
+            #
+            # sar -n EDEV : Network device errors
+            #
+            'rxerr/s' => "Bad Pkts Recv'd/Sec",
+            'txerr/s' => "Trans Errors/Sec",
+            'coll/s' => "Collisions/Sec",
+            'rxdrop/s' => "Recv Pkts Dropped/Sec",
+            'txdrop/s' => "Trans Pkts Dropped/Sec",
+            'txcarr/s' => "Trans Carrier Errors/Sec",
+            'rxfram/s' => "Recv Frame Alignment Errors/Sec",
+            'rxfifo/s' => "Recv FIFO Overrun Errors/Sec",
+            'txfifo/s' => "Trans FIFO Overrun Errors/Sec",
+            #
+            # sar -n NFS : NFS client activity
+            #
+            'call/s' => "RPC Requests Made/Sec",
+            'retrans/s' => "RPC Retransmitted Requests Made/Sec",
+            'read/s' => "RPC Read Requests Made/Sec",
+            'write/s' => "RPC Write Requests Made/Sec",
+            'access/s' => "RPC Access Requests Made/Sec",
+            'getatt/s' => "RPC Getattr Requests Made/Sec",
+            #
+            # sar -n NFSD : NFS server activity
+            #
+            'scall/s' => "RPC Requests Recv'd/Sec",
+            'badcall/s' => "Bad RPC Requests Recv'd/Sec",
+            'packet/s' => "Network Packets Recv'd/Sec",
+            'udp/s' => "UDP Packets Recv'd/Sec",
+            'tcp/s' => "TCP Packets Recv'd/Sec",
+            'hit/s' => "Reply Cache Hits/Sec",
+            'miss/s' => "Reply Cache Misses/Sec",
+            'sread/s' => "RPC Read Calls Recv'd/Sec",
+            'swrite/s' => "RPC Write Calls Recv'd/Sec",
+            'saccess/s' => "RPC Access Calls Recv'd/Sec",
+            'sgetatt/s' => "RPC Getattr Calls Recv'd/Sec",
+            #
+            # sar -n SOCK : Socket stats
+            #
+            'totsck' => "Total Used Sockets",
+            'tcpsck' => "TCP Sockets in Use",
+            'udpsck' => "UDP Sockets in Use",
+            'rawsck' => "Raw Sockets in Use",
+            'ip-frag' => "IP Fragments in Use",
+            #
+            # sar -q : Queue length & load average
+            #
+            'runq-sz' => "Run Queue Length",
+            'plist-sz' => "No. of Processes in List",
+            'ldavg-1' => "System Load Avg. Last Min.",
+            'ldavg-5' => "System Load Avg. Last 5 Mins.",
+            'ldavg-15' => "System Load Avg. Last 15 Mins.",
+            #
+            # sar -r : Memory & swap space utilisation stats
+            #
+            'kbmemfree' => "Free Memory KB",
+            'kbmemused' => "Used Memory KB",
+            '%memused' => "% Memory Used",
+            'kbbuffers' => "Kernel Buffers KB",
+            'kbcached' => "Data Cache KB",
+            'kbswpfree' => "Free Swap Space KB",
+            'kbswpused' => "Used Swap Space KB",
+            '%swpused' => "% Swap Used",
+            'kbswpcad' => "Cached Swap KB",
+            #
+            # sar -R : Memory stats
+            #
+            'frmpg/s' => "Memory Pages Freed/Sec",
+            'bufpg/s' => "Add'l Buffer Pages/Sec",
+            'campg/s' => "Add'l Cache Pages/Sec",
+            #
+            # sar -u : CPU stats
+            #
+            '%user' => "% User Level",
+            '%nice' => "% User Level (nice)",
+            '%system' => "% System Level",
+            '%iowait' => "% Idle Waiting on I/O (IOwait)",
+            '%steal' => "% Time Involuntary Waiting on Another vCPU",
+            '%idle' => "% Idle",
+            '%utilisation' => "% Utilisation",
+            #
+            # sar -v : Files, inodes & other kernel tables
+            #
+            'dentunusd' => "Unused Directory Cache Entries",
+            'file-sz' => "Used File Handles",
+            '%file-sz' => "% Used File Handles",
+            'inode-sz' => "Used Inode Handlers",
+            'super-sz' => "Super Block Handlers",
+            '%super-sz' => "% Allocated Super Block Handlers",
+            'dquot-sz' => "Allocated Disc Quota Entries",
+            '%dquot-sz' => "% Allocated Disc Quota Entries",
+            'rtsig-sz' => "Queued RT Signals",
+            '%rtsig-sz' => "% Queued RT Signals",
+            #
+            # sar -w : Context switches
+            #
+            'cswch/s' => "Context Switches/Sec",
+            #
+            # sar -W : Swapping stats
+            #
+            'pswpin/s' => "Pages Swapped In/Sec",
+            'pswpout/s' => "Pages Swapped Out/Sec",
+            #
+            # sar -x ALL : Process stats
+            #
+            'minflt/s' => "Minor Faults/Sec",
+            'majflt/s' => "Major Faults/Sec",
+            'nswap/s' => "Process Pages Swapped Out/Sec",
+            #
+            # sar -X ALL : Child process stats
+            #           
+            'cminflt/s' => "Child Process Minor Faults/Sec",
+            'cmajflt/s' => "Child Process Major Faults/Sec",
+            '%cuser' => "Child Process % User Level",
+            '%csystem' => "Child Process % System Level",
+            'cnswap/s' => "Child Process Pages Swapped Out/Sec",
+            #
+            # sar -y : TTY device activity
+            #
+            'Recvin/s' => "Serial Line Recv Ints/Sec",
+            'xmtin/s' => "Serial Line Trans Ints/Sec",
+            'framerr/s' => "Serial Line Frame Errors/Sec",
+            'prtyerr/s' => "Serial Line Parity Errors/Sec",
+            'brk/s' => "Serial Line Breaks/Sec",
+            'ovrun/s' => "Serial Line Overruns/Sec",
+            #
+            # Legacy
+            #                                  
+            'blks/s' => "Blocks Tranferred/Sec",
+            'activepg' => "Active Memory Pages",
+            'inadtypg' => "Inactive Dirty Pages",
+            'inaclnpg' => "Inactive Clean Pages",
+            'inatarpg' => "Inactive Target Pages",
+            'shmpg/s' => "Add'l Pages Shared/Sec",
+            'kbmemshrd' => "Shared Memory KB"
+            );
 
 my %Sar9Headings = (
-			#
-			# sar -b : I/O and transfer rate stats
-			#
-			'tps' => "Transfers/Sec",
-			'rtps' => "Read Transfers/Sec",
-			'wtps' => "Write Transfers/Sec",
-			'bread/s' => "Blocks Read/Sec",
-			'bwrtn/s' => "Blocks Written/Sec",
-			#
-			# sar -B : Paging stats
-			#
-			'pgpgin/s' => "KB Paged In/Sec",
-			'pgpgout/s' => "KB Paged Out/Sec",
-			'fault/s' => "Total Page Faults/Sec",
-			'majflt/s' => "Major Faults/Sec",
-			'pgfree/s' => "Pages Added to Free List/Sec",
-			'pgscank/s' => "Pages Scanned by kswapd/Sec",
-			'pgscand/s' => "Pages Scanned Directly/Sec",
-			'pgsteal/s' => "Pages Reclaimed from Cache/Sec",
-			'%vmeff' => "% Efficiency of Page Reclaim",
-			#
-			# sar -d : I/O activity for each block device
-			#
-			'rd_sec/s' => "Sectors Read/Sec",
-			'wr_sec/s' => "Sectors Written/Sec",
-			'avgrq-sz' => "Average Request Size (Sectors)",
-			'avgqu-sz' => "Average Queue Length",
-			'await' => "Average I/O Time inc Wait(ms)",
-			'svctm' => "Average I/O Svc Time (unreliable)",
-			'%util' => "% Bandwidth Utilisation",
-			#
-			# sar -I SUM : Total interrupts
-			#
-		    'intr/s' => "Interrupts/Sec",
-			#
-			# sar -m : Power Management Stats
-			#
-			'MHz' => "CPU Clock Frequency (MHz)",
-			#
-			# sar -n DEV : Network device stats
-			#
-			'rxpck/s' => "Pkts Recv'd/Sec",
-			'txpck/s' => "Pkts Trans'd/Sec",
-			'rxkB/s' => "KBytes Recv'd/Sec",
-			'txkB/s' => "KBytes Trans'd/Sec",
-			'rxcmp/s' => "Compressed Pkts Recv'd/Sec",
-			'txcmp/s' => "Compressed Pkts Trans'd/Sec",
-			'rxmcst/s' => "Multicast Pkts Recv'd/Sec",
-			#
-			# sar -n EDEV : Network device errors
-			#
-			'rxerr/s' => "Bad Pkts Recv'd/Sec",
-			'txerr/s' => "Trans Errors/Sec",
-			'coll/s' => "Collisions/Sec",
-			'rxdrop/s' => "Recv Pkts Dropped/Sec",
-			'txdrop/s' => "Trans Pkts Dropped/Sec",
-			'txcarr/s' => "Trans Carrier Errors/Sec",
-			'rxfram/s' => "Recv Frame Alignment Errors/Sec",
-			'rxfifo/s' => "Recv FIFO Overrun Errors/Sec",
-			'txfifo/s' => "Trans FIFO Overrun Errors/Sec",
-			#
-			# sar -n NFS : NFS client activity
-			#
-			'call/s' => "RPC Requests Made/Sec",
-			'retrans/s' => "RPC Retransmitted Requests Made/Sec",
-			'read/s' => "RPC Read Requests Made/Sec",
-			'write/s' => "RPC Write Requests Made/Sec",
-			'access/s' => "RPC Access Requests Made/Sec",
-			'getatt/s' => "RPC Getattr Requests Made/Sec",
-			#
-			# sar -n NFSD : NFS server activity
-			#
-			'scall/s' => "RPC Requests Recv'd/Sec",
-			'badcall/s' => "Bad RPC Requests Recv'd/Sec",
-			'packet/s' => "Network Packets Recv'd/Sec",
-			'udp/s' => "UDP Packets Recv'd/Sec",
-			'tcp/s' => "TCP Packets Recv'd/Sec",
-			'hit/s' => "Reply Cache Hits/Sec",
-			'miss/s' => "Reply Cache Misses/Sec",
-			'sread/s' => "RPC Read Calls Recv'd/Sec",
-			'swrite/s' => "RPC Write Calls Recv'd/Sec",
-			'saccess/s' => "RPC Access Calls Recv'd/Sec",
-			'sgetatt/s' => "RPC Getattr Calls Recv'd/Sec",
-			#
-			# sar -n SOCK : Socket stats
-			#
-			'totsck' => "Total Used Sockets",
-			'tcpsck' => "TCP Sockets in Use",
-			'udpsck' => "UDP Sockets in Use",
-			'rawsck' => "Raw Sockets in Use",
-			'ip-frag' => "IP Fragments in Use",
-			'tcp-tw' => "TCP Sockets in TIME_WAIT State",
-			#
-			# sar -n IP : IPv4 stats (Requires "sa1 -S SNMP")
-			#
-			'irec/s' => "Input D'grams/Sec",
-			'fwddgm/s' => "Forwarded D'grams/Sec",
-			'idel/s' => "Input D'grams Successfully Delivered/Sec",
-			'orq/s' => "Locally Originated D'grams/Sec",
-			'asmrq/s' => "Fragments Needing Reassembly/Sec",
-			'asmok/s' => "D'grams Successfully Reassembed/Sec",
-			'fragok/s' => "D'grams Successfully Fragmented/Sec",
-			'fragcrt/s' => "D'gram Fragments Created/Sec",
-			#
-			# sar -n EIP : IPv4 errors (Requires "sa1 -S SNMP")
-			#
-			'ihdrerr/s' => "Input D'gram IP Header Errors/Sec",
-			'iadrerr/s' => "Input D'gram IP Header Invalid Address/Sec",
-			'iukwnpr/s' => "Input D'gram Unknown Protocol/Sec",
-			'idisc/s' => "Input D'grams Discarded/Sec",
-			'odisc/s' => "Output D'grams Discarded/Sec",
-			'onort/s' => "D'grams Discarded No Route/Sec",
-			'asmf/s' => "IP Reassembly Failures/Sec",
-			'fragf/s' => "D'grams Not Fragmented/Sec",
-			#
-			# sar -n ICMP : ICMPv4 stats (Requires "sa1 -S SNMP")
-			#
-			'imsg/s' => "ICMP Msgs Recv'd/Sec",
-			'omsg/s' => "ICMP Msgs Trans'd (attempted)/Sec",
-			'iech/s' => "ICMP Echo Requests Recv'd/Sec",
-			'iechr/s' => "ICMP Echo Replies Recv'd/Sec",
-			'oech/s' => "ICMP Echo Requests Trans'd/Sec",
-			'oechr/s' => "ICMP Echo Replies Trans'd/Sec",
-			'itm/s' => "ICMP Timestamp Requests Recv'd/Sec",
-			'itmr/s' => "ICMP Timestamp Replies Recv'd/Sec",
-			'otm/s' => "ICMP Timestamp Requests Trans'd/Sec",
-			'otmr/s' => "ICMP Timestamp Replies Trans'd/Sec",
-			'iadrmk/s' => "ICMP Address Mask Requests Recv'd/Sec",
-			'iadrmkr/s' => "ICMP Address Mask Replies Recv'd/Sec",
-			'oadrmk/s' => "ICMP Address Mask Requests Trans'd/Sec",
-			'oadrmkr/s' => "ICMP Address Mask Replies Trans'd/Sec",
-			#
-			# sar -n EICMP : ICMPv4 errors (Requires "sa1 -S SNMP")
-			#
-			'ierr/s' => "ICMP Msgs With Errors Recv'd/Sec",
-			'oerr/s' => "ICMP Msgs Not Trans'd/Sec",
-			'idstunr/s' => "ICMP Dest. Unreach Msgs Recv'd/Sec",
-			'odstunr/s' => "ICMP Dest. Unreach Msgs Trans'd/Sec",
-			'itmex/s' => "ICMP Time Exceeded Msgs Recv'd/Sec",
-			'otmex/s' => "ICMP Time Exceeded Msgs Trans'd/Sec",
-			'iparmpb/s' => "ICMP Parameter Problem Msgs Recv'd/Sec",
-			'oparmpb/s' => "ICMP Parameter Problem Msgs Trans'd/Sec",
-			'isrcq/s' => "ICMP Source Quench Msgs Recv'd/Sec",
-			'osrcq/s' => "ICMP Source Quench Msgs Trans'd/Sec",
-			'iredir/s' => "ICMP Redirect Msgs Recv'd/Sec",
-			'oredir/s' => "ICMP Redirect Msgs Trans'd/Sec",
-			#
-			# sar -n TCP : TCPv4 stats (Requires "sa1 -S SNMP")
-			#
-			'active/s' => "TCP Active Opens/Sec",
-			'passive/s' => "TCP Passive Opens/Sec",
-			'iseg/s' => "TCP Segments Recv'd/Sec",
-			'oseg/s' => "TCP Segments Trans'd/Sec",
-			#
-			# sar -n ETCP : TCPv4 errors (Requires "sa1 -S SNMP")
-			#
-			'atmptf/s' => "TCP Attempt Fails/Sec",
-			'estres/s' => "TCP Establish Resets/Sec",
-			'retrans/s' => "TCP Segments Retrans'd/Sec",
-			'isegerr/s' => "Bad TCP Segments Recv'd/Sec",
-			'orsts/s' => "TCP RSTs Trans'd/Sec",
-			#
-			# sar -n UDP : UDPv4 stats (Requires "sa1 -S SNMP")
-			#
-			'idgm/s' => "UDP D'grams Recv'd/Sec",
-			'odgm/s' => "UDP D'grams Trans'd/Sec",
-			'noport/s' => "UDP D'grams Trans'd/Sec No Port",
-			'idgmerr/s' => "UDP D'grams Trans'd/Sec Undelivered",
-			#
-			# sar -q : Queue length & load average
-			#
-			'runq-sz' => "Run Queue Length",
-			'plist-sz' => "No. of Processes in List",
-			'ldavg-1' => "System Load Avg. Last Min.",
-			'ldavg-5' => "System Load Avg. Last 5 Mins.",
-			'ldavg-15' => "System Load Avg. Last 15 Mins.",
-			'blocked' => "No. of Processes Blocked on I/O",
-			#
-			# sar -r : Memory utilisation stats
-			#
-			'kbmemfree' => "Free Memory KB",
-			'kbmemused' => "Used Memory KB",
-			'%memused' => "% Memory Used",
-			'kbbuffers' => "Kernel Buffers KB",
-			'kbcached' => "Data Cache KB",
-			'kbcommit' => "KB Required for Current Workload",
-			'%commit' => "% Memory Required for Current Workload",
-			#
-			# sar -R : Memory stats
-			#
-			'frmpg/s' => "Memory Pages Freed/Sec",
-			'bufpg/s' => "Add'l Buffer Pages/Sec",
-			'campg/s' => "Add'l Cache Pages/Sec",
-			#
-			# sar -S : Swap utilisation stats
-			#
-			'kbswpfree' => "Free Swap Space KB",
-			'kbswpused' => "Used Swap Space KB",
-			'%swpused' => "% Swap Used",
-			'kbswpcad' => "Cached Swap KB",
-			'%swpcad' => "% Cached Swap/Used Swap",
-			#
-			# sar -u : CPU stats
-			#
-			'%user' => "% User Level inc. vCPU",
-			'%usr' => "% User Level excl. vCPU",
-			'%nice' => "% User Level (nice)",
-			'%system' => "% System Level (inc. interrupts)",
-			'%sys' => "% System Level (excl. interrupts)",
-			'%iowait' => "% Idle Waiting on I/O (IOwait)",
-			'%steal' => "% Time Involuntary Waiting on Another vCPU",
-			'%irq' => "% Time Servicing HW Interrupts",
-			'%soft' => "% Time Servicing SW Interrupts",
-			'%guest' => "% Time running a vCPU",
-			'%idle' => "% Idle",
-		    '%utilisation' => "% Utilisation",
-			#
-			# sar -v : Files, inodes & other kernel tables
-			#
-			'dentunusd' => "Unused Directory Cache Entries",
-			'file-nr' => "Used File Handles",
-			'inode-nr' => "Used Inode Handlers",
-			'pty-nr' => "Number of Pseudo-Terminals in Use",
-			#
-			# sar -w : task creation and system switching activity
-			#
-			'proc/s' => "Processes Created/Sec",
-			'cswch/s' => "Context Switches/Sec",
-			#
-			# sar -W : Swapping stats
-			#
-			'pswpin/s' => "Pages Swapped In/Sec",
-			'pswpout/s' => "Pages Swapped Out/Sec",
-			#
-			# sar -y : TTY device activity
-			#
-			'recvin/s' => "Serial Line Recv Ints/Sec",
-			'xmtin/s' => "Serial Line Trans Ints/Sec",
-			'framerr/s' => "Serial Line Frame Errors/Sec",
-			'prtyerr/s' => "Serial Line Parity Errors/Sec",
-			'brk/s' => "Serial Line Breaks/Sec",
-			'ovrun/s' => "Serial Line Overruns/Sec",     		       		       
-			);
+            #
+            # sar -b : I/O and transfer rate stats
+            #
+            'tps' => "Transfers/Sec",
+            'rtps' => "Read Transfers/Sec",
+            'wtps' => "Write Transfers/Sec",
+            'bread/s' => "Blocks Read/Sec",
+            'bwrtn/s' => "Blocks Written/Sec",
+            #
+            # sar -B : Paging stats
+            #
+            'pgpgin/s' => "KB Paged In/Sec",
+            'pgpgout/s' => "KB Paged Out/Sec",
+            'fault/s' => "Total Page Faults/Sec",
+            'majflt/s' => "Major Faults/Sec",
+            'pgfree/s' => "Pages Added to Free List/Sec",
+            'pgscank/s' => "Pages Scanned by kswapd/Sec",
+            'pgscand/s' => "Pages Scanned Directly/Sec",
+            'pgsteal/s' => "Pages Reclaimed from Cache/Sec",
+            '%vmeff' => "% Efficiency of Page Reclaim",
+            #
+            # sar -d : I/O activity for each block device
+            #
+            'rd_sec/s' => "Sectors Read/Sec",
+            'wr_sec/s' => "Sectors Written/Sec",
+            'avgrq-sz' => "Average Request Size (Sectors)",
+            'avgqu-sz' => "Average Queue Length",
+            'await' => "Average I/O Time inc Wait(ms)",
+            'svctm' => "Average I/O Svc Time (unreliable)",
+            '%util' => "% Bandwidth Utilisation",
+            #
+            # sar -I SUM : Total interrupts
+            #
+            'intr/s' => "Interrupts/Sec",
+            #
+            # sar -m : Power Management Stats
+            #
+            'MHz' => "CPU Clock Frequency (MHz)",
+            #
+            # sar -n DEV : Network device stats
+            #
+            'rxpck/s' => "Pkts Recv'd/Sec",
+            'txpck/s' => "Pkts Trans'd/Sec",
+            'rxkB/s' => "KBytes Recv'd/Sec",
+            'txkB/s' => "KBytes Trans'd/Sec",
+            'rxcmp/s' => "Compressed Pkts Recv'd/Sec",
+            'txcmp/s' => "Compressed Pkts Trans'd/Sec",
+            'rxmcst/s' => "Multicast Pkts Recv'd/Sec",
+            #
+            # sar -n EDEV : Network device errors
+            #
+            'rxerr/s' => "Bad Pkts Recv'd/Sec",
+            'txerr/s' => "Trans Errors/Sec",
+            'coll/s' => "Collisions/Sec",
+            'rxdrop/s' => "Recv Pkts Dropped/Sec",
+            'txdrop/s' => "Trans Pkts Dropped/Sec",
+            'txcarr/s' => "Trans Carrier Errors/Sec",
+            'rxfram/s' => "Recv Frame Alignment Errors/Sec",
+            'rxfifo/s' => "Recv FIFO Overrun Errors/Sec",
+            'txfifo/s' => "Trans FIFO Overrun Errors/Sec",
+            #
+            # sar -n NFS : NFS client activity
+            #
+            'call/s' => "RPC Requests Made/Sec",
+            'retrans/s' => "RPC Retransmitted Requests Made/Sec",
+            'read/s' => "RPC Read Requests Made/Sec",
+            'write/s' => "RPC Write Requests Made/Sec",
+            'access/s' => "RPC Access Requests Made/Sec",
+            'getatt/s' => "RPC Getattr Requests Made/Sec",
+            #
+            # sar -n NFSD : NFS server activity
+            #
+            'scall/s' => "RPC Requests Recv'd/Sec",
+            'badcall/s' => "Bad RPC Requests Recv'd/Sec",
+            'packet/s' => "Network Packets Recv'd/Sec",
+            'udp/s' => "UDP Packets Recv'd/Sec",
+            'tcp/s' => "TCP Packets Recv'd/Sec",
+            'hit/s' => "Reply Cache Hits/Sec",
+            'miss/s' => "Reply Cache Misses/Sec",
+            'sread/s' => "RPC Read Calls Recv'd/Sec",
+            'swrite/s' => "RPC Write Calls Recv'd/Sec",
+            'saccess/s' => "RPC Access Calls Recv'd/Sec",
+            'sgetatt/s' => "RPC Getattr Calls Recv'd/Sec",
+            #
+            # sar -n SOCK : Socket stats
+            #
+            'totsck' => "Total Used Sockets",
+            'tcpsck' => "TCP Sockets in Use",
+            'udpsck' => "UDP Sockets in Use",
+            'rawsck' => "Raw Sockets in Use",
+            'ip-frag' => "IP Fragments in Use",
+            'tcp-tw' => "TCP Sockets in TIME_WAIT State",
+            #
+            # sar -n IP : IPv4 stats (Requires "sa1 -S SNMP")
+            #
+            'irec/s' => "Input D'grams/Sec",
+            'fwddgm/s' => "Forwarded D'grams/Sec",
+            'idel/s' => "Input D'grams Successfully Delivered/Sec",
+            'orq/s' => "Locally Originated D'grams/Sec",
+            'asmrq/s' => "Fragments Needing Reassembly/Sec",
+            'asmok/s' => "D'grams Successfully Reassembed/Sec",
+            'fragok/s' => "D'grams Successfully Fragmented/Sec",
+            'fragcrt/s' => "D'gram Fragments Created/Sec",
+            #
+            # sar -n EIP : IPv4 errors (Requires "sa1 -S SNMP")
+            #
+            'ihdrerr/s' => "Input D'gram IP Header Errors/Sec",
+            'iadrerr/s' => "Input D'gram IP Header Invalid Address/Sec",
+            'iukwnpr/s' => "Input D'gram Unknown Protocol/Sec",
+            'idisc/s' => "Input D'grams Discarded/Sec",
+            'odisc/s' => "Output D'grams Discarded/Sec",
+            'onort/s' => "D'grams Discarded No Route/Sec",
+            'asmf/s' => "IP Reassembly Failures/Sec",
+            'fragf/s' => "D'grams Not Fragmented/Sec",
+            #
+            # sar -n ICMP : ICMPv4 stats (Requires "sa1 -S SNMP")
+            #
+            'imsg/s' => "ICMP Msgs Recv'd/Sec",
+            'omsg/s' => "ICMP Msgs Trans'd (attempted)/Sec",
+            'iech/s' => "ICMP Echo Requests Recv'd/Sec",
+            'iechr/s' => "ICMP Echo Replies Recv'd/Sec",
+            'oech/s' => "ICMP Echo Requests Trans'd/Sec",
+            'oechr/s' => "ICMP Echo Replies Trans'd/Sec",
+            'itm/s' => "ICMP Timestamp Requests Recv'd/Sec",
+            'itmr/s' => "ICMP Timestamp Replies Recv'd/Sec",
+            'otm/s' => "ICMP Timestamp Requests Trans'd/Sec",
+            'otmr/s' => "ICMP Timestamp Replies Trans'd/Sec",
+            'iadrmk/s' => "ICMP Address Mask Requests Recv'd/Sec",
+            'iadrmkr/s' => "ICMP Address Mask Replies Recv'd/Sec",
+            'oadrmk/s' => "ICMP Address Mask Requests Trans'd/Sec",
+            'oadrmkr/s' => "ICMP Address Mask Replies Trans'd/Sec",
+            #
+            # sar -n EICMP : ICMPv4 errors (Requires "sa1 -S SNMP")
+            #
+            'ierr/s' => "ICMP Msgs With Errors Recv'd/Sec",
+            'oerr/s' => "ICMP Msgs Not Trans'd/Sec",
+            'idstunr/s' => "ICMP Dest. Unreach Msgs Recv'd/Sec",
+            'odstunr/s' => "ICMP Dest. Unreach Msgs Trans'd/Sec",
+            'itmex/s' => "ICMP Time Exceeded Msgs Recv'd/Sec",
+            'otmex/s' => "ICMP Time Exceeded Msgs Trans'd/Sec",
+            'iparmpb/s' => "ICMP Parameter Problem Msgs Recv'd/Sec",
+            'oparmpb/s' => "ICMP Parameter Problem Msgs Trans'd/Sec",
+            'isrcq/s' => "ICMP Source Quench Msgs Recv'd/Sec",
+            'osrcq/s' => "ICMP Source Quench Msgs Trans'd/Sec",
+            'iredir/s' => "ICMP Redirect Msgs Recv'd/Sec",
+            'oredir/s' => "ICMP Redirect Msgs Trans'd/Sec",
+            #
+            # sar -n TCP : TCPv4 stats (Requires "sa1 -S SNMP")
+            #
+            'active/s' => "TCP Active Opens/Sec",
+            'passive/s' => "TCP Passive Opens/Sec",
+            'iseg/s' => "TCP Segments Recv'd/Sec",
+            'oseg/s' => "TCP Segments Trans'd/Sec",
+            #
+            # sar -n ETCP : TCPv4 errors (Requires "sa1 -S SNMP")
+            #
+            'atmptf/s' => "TCP Attempt Fails/Sec",
+            'estres/s' => "TCP Establish Resets/Sec",
+            'retrans/s' => "TCP Segments Retrans'd/Sec",
+            'isegerr/s' => "Bad TCP Segments Recv'd/Sec",
+            'orsts/s' => "TCP RSTs Trans'd/Sec",
+            #
+            # sar -n UDP : UDPv4 stats (Requires "sa1 -S SNMP")
+            #
+            'idgm/s' => "UDP D'grams Recv'd/Sec",
+            'odgm/s' => "UDP D'grams Trans'd/Sec",
+            'noport/s' => "UDP D'grams Trans'd/Sec No Port",
+            'idgmerr/s' => "UDP D'grams Trans'd/Sec Undelivered",
+            #
+            # sar -q : Queue length & load average
+            #
+            'runq-sz' => "Run Queue Length",
+            'plist-sz' => "No. of Processes in List",
+            'ldavg-1' => "System Load Avg. Last Min.",
+            'ldavg-5' => "System Load Avg. Last 5 Mins.",
+            'ldavg-15' => "System Load Avg. Last 15 Mins.",
+            'blocked' => "No. of Processes Blocked on I/O",
+            #
+            # sar -r : Memory utilisation stats
+            #
+            'kbmemfree' => "Free Memory KB",
+            'kbmemused' => "Used Memory KB",
+            '%memused' => "% Memory Used",
+            'kbbuffers' => "Kernel Buffers KB",
+            'kbcached' => "Data Cache KB",
+            'kbcommit' => "KB Required for Current Workload",
+            '%commit' => "% Memory Required for Current Workload",
+            #
+            # sar -R : Memory stats
+            #
+            'frmpg/s' => "Memory Pages Freed/Sec",
+            'bufpg/s' => "Add'l Buffer Pages/Sec",
+            'campg/s' => "Add'l Cache Pages/Sec",
+            #
+            # sar -S : Swap utilisation stats
+            #
+            'kbswpfree' => "Free Swap Space KB",
+            'kbswpused' => "Used Swap Space KB",
+            '%swpused' => "% Swap Used",
+            'kbswpcad' => "Cached Swap KB",
+            '%swpcad' => "% Cached Swap/Used Swap",
+            #
+            # sar -u : CPU stats
+            #
+            '%user' => "% User Level inc. vCPU",
+            '%usr' => "% User Level excl. vCPU",
+            '%nice' => "% User Level (nice)",
+            '%system' => "% System Level (inc. interrupts)",
+            '%sys' => "% System Level (excl. interrupts)",
+            '%iowait' => "% Idle Waiting on I/O (IOwait)",
+            '%steal' => "% Time Involuntary Waiting on Another vCPU",
+            '%irq' => "% Time Servicing HW Interrupts",
+            '%soft' => "% Time Servicing SW Interrupts",
+            '%guest' => "% Time running a vCPU",
+            '%idle' => "% Idle",
+            '%utilisation' => "% Utilisation",
+            #
+            # sar -v : Files, inodes & other kernel tables
+            #
+            'dentunusd' => "Unused Directory Cache Entries",
+            'file-nr' => "Used File Handles",
+            'inode-nr' => "Used Inode Handlers",
+            'pty-nr' => "Number of Pseudo-Terminals in Use",
+            #
+            # sar -w : task creation and system switching activity
+            #
+            'proc/s' => "Processes Created/Sec",
+            'cswch/s' => "Context Switches/Sec",
+            #
+            # sar -W : Swapping stats
+            #
+            'pswpin/s' => "Pages Swapped In/Sec",
+            'pswpout/s' => "Pages Swapped Out/Sec",
+            #
+            # sar -y : TTY device activity
+            #
+            'recvin/s' => "Serial Line Recv Ints/Sec",
+            'xmtin/s' => "Serial Line Trans Ints/Sec",
+            'framerr/s' => "Serial Line Frame Errors/Sec",
+            'prtyerr/s' => "Serial Line Parity Errors/Sec",
+            'brk/s' => "Serial Line Breaks/Sec",
+            'ovrun/s' => "Serial Line Overruns/Sec",                               
+            );
 #
 # -------------------- End of Header Translation Table -------------------------
 my %TranslateHeading;
@@ -538,54 +538,54 @@ our ($opt_h, $opt_f, $opt_a, $opt_t, $opt_D, $opt_b, $opt_e, $opt_o, $opt_m, $op
 our ($Directory, $BeginTimeInSeconds, $EndTimeInSeconds, $OutputFile);
 
 if (defined $opt_V) {
-	print "sar2xls Version: " . VERSION . "\n";
-	exit;
+    print "sar2xls Version: " . VERSION . "\n";
+    exit;
 }
 if (defined $opt_h) {
-	PrintUsage();
-	exit;
+    PrintUsage();
+    exit;
 }
 if (defined $opt_D) {
-	$Directory = $opt_D;
+    $Directory = $opt_D;
 } else {
-	$Directory = ".";
+    $Directory = ".";
 }
 if ((defined $opt_b) && !(defined $opt_e)) {
-	print "\n*** Error - Must match a begin time with an end time ***\n";
-	PrintUsage();
-	exit;
+    print "\n*** Error - Must match a begin time with an end time ***\n";
+    PrintUsage();
+    exit;
 }
 if ((defined $opt_e) && !(defined $opt_b)) {
-	print "\n*** Error - Must match an end time with a begin time ***\n";
-	PrintUsage();
-	exit;
+    print "\n*** Error - Must match an end time with a begin time ***\n";
+    PrintUsage();
+    exit;
 }
 if ((defined $opt_a) && (defined $opt_o)) {
-	print "\n*** Error - Can't specifiy a single output file for multiple input files ***\n";
-	PrintUsage();
-	exit;
+    print "\n*** Error - Can't specifiy a single output file for multiple input files ***\n";
+    PrintUsage();
+    exit;
 }
 if (defined $opt_b){
-	if ($opt_b !~ /(\d{2}):(\d{2}):(\d{2})/) {
-		print "\n*** Error - Wrong begin time format - need hh:mm:ss\n";
-		PrintUsage();
-		exit;
-	} else {
-		$BeginTimeInSeconds = $1*3600 + $2*60 + $3;
-	}
+    if ($opt_b !~ /(\d{2}):(\d{2}):(\d{2})/) {
+        print "\n*** Error - Wrong begin time format - need hh:mm:ss\n";
+        PrintUsage();
+        exit;
+    } else {
+        $BeginTimeInSeconds = $1*3600 + $2*60 + $3;
+    }
 } else {
-	$BeginTimeInSeconds = 0;
+    $BeginTimeInSeconds = 0;
 }
 if (defined $opt_e){
-	if ($opt_e !~ /(\d{2}):(\d{2}):(\d{2})/) {
-		print "\n*** Error - Wrong end time format - need hh:mm:ss\n";
-		PrintUsage();
-		exit;
-	} else {
-		$EndTimeInSeconds = $1*3600 + $2*60 + $3;
-	}
+    if ($opt_e !~ /(\d{2}):(\d{2}):(\d{2})/) {
+        print "\n*** Error - Wrong end time format - need hh:mm:ss\n";
+        PrintUsage();
+        exit;
+    } else {
+        $EndTimeInSeconds = $1*3600 + $2*60 + $3;
+    }
 } else {
-	$EndTimeInSeconds = 86400;
+    $EndTimeInSeconds = 86400;
 }
 #
 # Build the array of files to be processed
@@ -601,7 +601,7 @@ if (defined $opt_f){
     #
     # Otherwise if -a was specified, read all the files in the directory
     #
-	opendir (DIR, "$Directory/");
+    opendir (DIR, "$Directory/");
     my @AllFileList = readdir(DIR);
     closedir (DIR);
     for my $File (@AllFileList) {
@@ -609,8 +609,8 @@ if (defined $opt_f){
     }
 } else {
     print "\n*** Error - No input file specified on the command line ***\n";
-	PrintUsage();
-	exit;
+    PrintUsage();
+    exit;
 }
 my (%AmberThresholds, %RedThresholds, $CheckThresholds);
 #
@@ -639,66 +639,66 @@ for my $SarFile (@SarFileList){
     #
     # Read the first line and parse out the kernel, system name and date
     #
-	my $line1 = <INFILE>;
-	#
-	# Work out if we're using a sar file from sysstat 5.x.x, 7.x.x or 9.x.x 
-	#
-	my $Sysstat7 = FALSE;
-	my $Sysstat9 = FALSE;
-	our ($KernelVersion, $ServerFQDN, $ServerShortName, $DomainName, $StatsDate);
+    my $line1 = <INFILE>;
+    #
+    # Work out if we're using a sar file from sysstat 5.x.x, 7.x.x or 9.x.x 
+    #
+    my $Sysstat7 = FALSE;
+    my $Sysstat9 = FALSE;
+    our ($KernelVersion, $ServerFQDN, $ServerShortName, $DomainName, $StatsDate);
     if ($line1 =~ /^(Linux .*) \((.*)\).*\s+(.+?)\s+_.+_\s+\(\d+ CPU\)$/){
-		#
-		# Looks like a sysstat 9 file (RHEL6, Ubuntu 10.04, etc.)
-		#
-		$Sysstat9 = TRUE;
-		%TranslateHeading = %Sar9Headings;
-		$KernelVersion = $1;
-		$ServerFQDN = $2;
-		($ServerShortName, $DomainName) = split /\./, $ServerFQDN, 2;
-		#
-		# Extract the date (annoyingly this could be in DD/MM/YY or YYYY-MM-DD format)
-		#
-		if ($3 =~ /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/) {
-			if (length($3) == 2){
-				$StatsDate = "20$3-$2-$1";
-			}else{
-				$StatsDate = "$3-$2-$1";
-			}
-		} elsif ($3 =~ /(\d{1,4})-(\d{1,2})-(\d{2,4})/) {
-			$StatsDate = "$1-$2-$3";
-		}
-	} elsif ($line1 =~ /^(Linux .*) \((.*)\)\s+(.*)$/){
-		#
-		# Looks like a sysstat 5 or 7 file (RHEL4 or RHEL5)
-		#
-		$Sysstat7 = TRUE;
-		%TranslateHeading = %Sar7Headings;
-		$KernelVersion = $1;
-		$ServerFQDN = $2;
-		($ServerShortName, $DomainName) = split /\./, $ServerFQDN, 2;
-		$StatsDate = $3;
-	} else {
-		print "File $Directory/$SarFile doesn't look like a sar file, skipping...\n";
-		next;
-	}
+        #
+        # Looks like a sysstat 9 file (RHEL6, Ubuntu 10.04, etc.)
+        #
+        $Sysstat9 = TRUE;
+        %TranslateHeading = %Sar9Headings;
+        $KernelVersion = $1;
+        $ServerFQDN = $2;
+        ($ServerShortName, $DomainName) = split /\./, $ServerFQDN, 2;
+        #
+        # Extract the date (annoyingly this could be in DD/MM/YY or YYYY-MM-DD format)
+        #
+        if ($3 =~ /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/) {
+            if (length($3) == 2){
+                $StatsDate = "20$3-$2-$1";
+            }else{
+                $StatsDate = "$3-$2-$1";
+            }
+        } elsif ($3 =~ /(\d{1,4})-(\d{1,2})-(\d{2,4})/) {
+            $StatsDate = "$1-$2-$3";
+        }
+    } elsif ($line1 =~ /^(Linux .*) \((.*)\)\s+(.*)$/){
+        #
+        # Looks like a sysstat 5 or 7 file (RHEL4 or RHEL5)
+        #
+        $Sysstat7 = TRUE;
+        %TranslateHeading = %Sar7Headings;
+        $KernelVersion = $1;
+        $ServerFQDN = $2;
+        ($ServerShortName, $DomainName) = split /\./, $ServerFQDN, 2;
+        $StatsDate = $3;
+    } else {
+        print "File $Directory/$SarFile doesn't look like a sar file, skipping...\n";
+        next;
+    }
     $StatsDate =~ s/\//-/g;
     my ($year, $month, $day) = split /-/, $StatsDate;
     $PrintDate = "$day/$month/$year";
 
     print "Processing $Directory/$SarFile which is a sar file for $ServerShortName on $StatsDate...\n";
-	if (defined $opt_o){
-		$OutputFile = $opt_o;
-	} else {
-		$OutputFile = "$ServerShortName-$StatsDate.xls";
-	}
+    if (defined $opt_o){
+        $OutputFile = $opt_o;
+    } else {
+        $OutputFile = "$ServerShortName-$StatsDate.xls";
+    }
     #
     # Create a new Excel workbook
     #
     my $Book = Spreadsheet::WriteExcel->new("$Directory/$OutputFile");
-	if (!defined $Book) {
-		print "Exiting...\n";
-		exit;
-	}
+    if (!defined $Book) {
+        print "Exiting...\n";
+        exit;
+    }
     #
     # Set "compatibility_mode to stop "File Error: data may have been lost"
     # Msgs when using thresholds files and Office 2003 SP3 and later
@@ -733,101 +733,101 @@ for my $SarFile (@SarFileList){
     # Set the column width for column A
     #
     $Sheet->set_column(0, 0, 56);
-	#
-	# See which sar sections we have in this file. %HeaderFound contains unique key words (defined as
-	# constants earlier) to identify the headers for each sar section
+    #
+    # See which sar sections we have in this file. %HeaderFound contains unique key words (defined as
+    # constants earlier) to identify the headers for each sar section
     #
     my %HeaderFound = (
-        PROCESSES, FALSE,			# Process creation
-        CONTEXT_SWITCHES, FALSE,	# Context switches
-        INTERRUPTS, FALSE,			# Interrupts
-        MEMORY_UTIL, FALSE,			# Memory Utilisation
-        CPU, FALSE,					# CPU
-        PAGING, FALSE,				# Paging stats
-        SWAPPING, FALSE,			# Swapping stats
-        IO, FALSE,					# I/O stats
-		DEV, FALSE,					# Per-device I/O stats
-        MEMORY, FALSE,				# Memory stats
-        SWAP_UTIL, FALSE,			# Swap Utilisation
-        FILES, FALSE,				# Inode & File 
-        SOCKETS, FALSE,				# Socket stats
-        RUN_QUEUE, FALSE,			# Process run queue
-        NETWORK, FALSE,				# Network Stats
-        NETWORK_ERRORS, FALSE,		# Network Errors
-        NFS_CLIENT, FALSE,			# NFS Client Stats
-        NFS_SERVER, FALSE,			# NFS Server Stats
-		IP, FALSE,					# IPv4 stats
-		IP_ERRORS, FALSE,			# IPv4 errors
-		ICMP, FALSE,				# ICMPv4 stats
-		ICMP_ERRORS, FALSE,			# ICMPv4 errors
-		TCP, FALSE, 				# TCPv4 stats
-		TCP_ERRORS, FALSE, 			# TCPv4 errors
-		UDP, FALSE					# UDP stats
+        PROCESSES, FALSE,           # Process creation
+        CONTEXT_SWITCHES, FALSE,    # Context switches
+        INTERRUPTS, FALSE,          # Interrupts
+        MEMORY_UTIL, FALSE,         # Memory Utilisation
+        CPU, FALSE,                 # CPU
+        PAGING, FALSE,              # Paging stats
+        SWAPPING, FALSE,            # Swapping stats
+        IO, FALSE,                  # I/O stats
+        DEV, FALSE,                 # Per-device I/O stats
+        MEMORY, FALSE,              # Memory stats
+        SWAP_UTIL, FALSE,           # Swap Utilisation
+        FILES, FALSE,               # Inode & File 
+        SOCKETS, FALSE,             # Socket stats
+        RUN_QUEUE, FALSE,           # Process run queue
+        NETWORK, FALSE,             # Network Stats
+        NETWORK_ERRORS, FALSE,      # Network Errors
+        NFS_CLIENT, FALSE,          # NFS Client Stats
+        NFS_SERVER, FALSE,          # NFS Server Stats
+        IP, FALSE,                  # IPv4 stats
+        IP_ERRORS, FALSE,           # IPv4 errors
+        ICMP, FALSE,                # ICMPv4 stats
+        ICMP_ERRORS, FALSE,         # ICMPv4 errors
+        TCP, FALSE,                 # TCPv4 stats
+        TCP_ERRORS, FALSE,          # TCPv4 errors
+        UDP, FALSE                  # UDP stats
     );
     #
-	# Read the file and see what we've got
-	#
+    # Read the file and see what we've got
+    #
     while (<INFILE>){
         foreach my $Keyword (keys %HeaderFound) {
-			if ($_ =~ /$Keyword/) {
-				$HeaderFound{$Keyword} = TRUE;
-			}
-		}
+            if ($_ =~ /$Keyword/) {
+                $HeaderFound{$Keyword} = TRUE;
+            }
+        }
     }
     #
     # Now process the data that we've found in the sar file
     #
     DisplayData("Processes", PROCESSES, $Book) if $HeaderFound{+PROCESSES};
-	if ($Sysstat7) {
-		DisplayData("Context Switches", CONTEXT_SWITCHES, $Book) if $HeaderFound{+CONTEXT_SWITCHES};
-		DisplayData("Interrupts", INTERRUPTS, $Book) if $HeaderFound{+INTERRUPTS};
-		DisplayData("Memory & Swap Utilisation", MEMORY_UTIL, $Book) if $HeaderFound{+MEMORY_UTIL};
-	}
-	if ($HeaderFound{+CPU}){
-		if (defined $opt_m){
-			DisplayMultiData("CPU", CPU, $Book) ;
-		} else {
-			DisplayCPUData($Book);
-		}
-	}
+    if ($Sysstat7) {
+        DisplayData("Context Switches", CONTEXT_SWITCHES, $Book) if $HeaderFound{+CONTEXT_SWITCHES};
+        DisplayData("Interrupts", INTERRUPTS, $Book) if $HeaderFound{+INTERRUPTS};
+        DisplayData("Memory & Swap Utilisation", MEMORY_UTIL, $Book) if $HeaderFound{+MEMORY_UTIL};
+    }
+    if ($HeaderFound{+CPU}){
+        if (defined $opt_m){
+            DisplayMultiData("CPU", CPU, $Book) ;
+        } else {
+            DisplayCPUData($Book);
+        }
+    }
     DisplayData("Paging", PAGING, $Book) if $HeaderFound{+PAGING};
     DisplayData("Swapping", SWAPPING, $Book) if $HeaderFound{+SWAPPING};
     DisplayData("Memory", MEMORY, $Book) if $HeaderFound{+MEMORY};
     if ($Sysstat9){
-		DisplayData("Memory Utilisation", MEMORY_UTIL, $Book) if $HeaderFound{+MEMORY_UTIL};
-		DisplayData("Swap Utilisation", SWAP_UTIL, $Book) if $HeaderFound{+SWAP_UTIL};
-	}
+        DisplayData("Memory Utilisation", MEMORY_UTIL, $Book) if $HeaderFound{+MEMORY_UTIL};
+        DisplayData("Swap Utilisation", SWAP_UTIL, $Book) if $HeaderFound{+SWAP_UTIL};
+    }
     DisplayData("Inode & File Tables", FILES, $Book) if $HeaderFound{+FILES};
     DisplayData("Sockets", SOCKETS, $Book) if $HeaderFound{+SOCKETS};
     DisplayData("Load Average", RUN_QUEUE, $Book) if $HeaderFound{+RUN_QUEUE};
     DisplayMultiData("Network", NETWORK, $Book) if $HeaderFound{+NETWORK};
     DisplayMultiData("Net Errors", NETWORK_ERRORS, $Book) if $HeaderFound{+NETWORK_ERRORS};
-	DisplayData("NFS Client", NFS_CLIENT, $Book) if $HeaderFound{+NFS_CLIENT};
-	DisplayData("NFS Server", NFS_SERVER, $Book) if $HeaderFound{+NFS_SERVER};
-	DisplayData("IPv4", IP, $Book) if $HeaderFound{+IP};
-	DisplayData("IPv4 Errors", IP_ERRORS, $Book) if $HeaderFound{+IP_ERRORS};
-	DisplayData("ICMPv4", ICMP, $Book) if $HeaderFound{+ICMP};
-	DisplayData("ICMPv4 Errors", ICMP_ERRORS, $Book) if $HeaderFound{+ICMP_ERRORS};
-	DisplayData("TCPv4", TCP, $Book) if $HeaderFound{+TCP};
-	DisplayData("TCPv4 Errors", TCP_ERRORS, $Book) if $HeaderFound{+TCP_ERRORS};
-	DisplayData("UDP", UDP, $Book) if $HeaderFound{+UDP};
+    DisplayData("NFS Client", NFS_CLIENT, $Book) if $HeaderFound{+NFS_CLIENT};
+    DisplayData("NFS Server", NFS_SERVER, $Book) if $HeaderFound{+NFS_SERVER};
+    DisplayData("IPv4", IP, $Book) if $HeaderFound{+IP};
+    DisplayData("IPv4 Errors", IP_ERRORS, $Book) if $HeaderFound{+IP_ERRORS};
+    DisplayData("ICMPv4", ICMP, $Book) if $HeaderFound{+ICMP};
+    DisplayData("ICMPv4 Errors", ICMP_ERRORS, $Book) if $HeaderFound{+ICMP_ERRORS};
+    DisplayData("TCPv4", TCP, $Book) if $HeaderFound{+TCP};
+    DisplayData("TCPv4 Errors", TCP_ERRORS, $Book) if $HeaderFound{+TCP_ERRORS};
+    DisplayData("UDP", UDP, $Book) if $HeaderFound{+UDP};
     DisplayData("Total IO", IO, $Book) if $HeaderFound{+IO};
     #
     # See if a device map file exists before we process block device I/O stats
     #
     if (open (DEVMAP, "$Directory/${ServerShortName}_dev_map")){
         while (<DEVMAP>){
-		    chomp;
-		    my($MajMin,$DevName) = split(/ = /);
-		    $DeviceMap{$MajMin} = $DevName;
-		}
+            chomp;
+            my($MajMin,$DevName) = split(/ = /);
+            $DeviceMap{$MajMin} = $DevName;
+        }
     } else {
-	    print "Not using a name mapping file for device name translations\n";
+        print "Not using a name mapping file for device name translations\n";
     }
     DisplayMultiData("IO", DEV, $Book) if $HeaderFound{+DEV};
-	#
-	# Close the sar file
-	#
+    #
+    # Close the sar file
+    #
     close (INFILE);
     #
     # Save and close the spreadsheet
@@ -882,20 +882,20 @@ sub ReadThresholds {
 # Returns:      Nothing
 #-------------------------------------------------------------------------------
 sub DisplayData {
-	my ($SheetName, $MatchString, $Book) = @_;
+    my ($SheetName, $MatchString, $Book) = @_;
 
-	my $Sheet = $Book->add_worksheet($SheetName);
+    my $Sheet = $Book->add_worksheet($SheetName);
 
-	my @Data = ReadStats($MatchString);
-	#
-	# First row of @Data is the headings in the sar file
-	#
-	my $Headings = shift @Data;
+    my @Data = ReadStats($MatchString);
+    #
+    # First row of @Data is the headings in the sar file
+    #
+    my $Headings = shift @Data;
         my $HeadingColumn = 0;
         my @HeadingColour;
         my (%ThisSheetRedThresholds, %ThisSheetAmberThresholds);
 
-	for my $Heading (@{$Headings}){
+    for my $Heading (@{$Headings}){
         if ($CheckThresholds) {
             #
             # See if there are any thresholds defined for this heading
@@ -912,18 +912,18 @@ sub DisplayData {
         #
         # Now translate the short heading name into a more meaningful heading
         #
-	    $Heading = $TranslateHeading{$Heading} if defined $TranslateHeading{$Heading};
+        $Heading = $TranslateHeading{$Heading} if defined $TranslateHeading{$Heading};
         $HeadingColumn++;
-	}
-	my $NumberOfFields = @{$Headings};
+    }
+    my $NumberOfFields = @{$Headings};
     my $CurrentRow = 2;
-	my $StatLine;
-	for $StatLine (@Data) {
+    my $StatLine;
+    for $StatLine (@Data) {
         FillRow($Sheet, $CurrentRow, $NumberOfFields, $StatLine, \%ThisSheetAmberThresholds, \%ThisSheetRedThresholds, \@HeadingColour);
-		$CurrentRow++;
-	}
+        $CurrentRow++;
+    }
     FillHeaderRow($Sheet, $NumberOfFields, \@{$Headings}, \@HeadingColour);
-	$Sheet->set_column(0, $NumberOfFields - 1, 10);
+    $Sheet->set_column(0, $NumberOfFields - 1, 10);
 }
 
 #-------------------------------------------------------------------------------
@@ -939,21 +939,21 @@ sub DisplayData {
 # Returns:      Nothing
 #-------------------------------------------------------------------------------
 sub DisplayMultiData {
-	my ($SheetName, $MatchString, $Book) = @_;
+    my ($SheetName, $MatchString, $Book) = @_;
 
-	my %Data = ReadMultiStats($MatchString);
+    my %Data = ReadMultiStats($MatchString);
     my $initialSheetNameLength = length($SheetName) + length(" - ");
     my $maxDataSetNameLength = 31 - $initialSheetNameLength;
     my $dataSetName;
     
-	foreach my $DataSet (keys %Data) {
+    foreach my $DataSet (keys %Data) {
         if (length($DataSet) > $maxDataSetNameLength) {
             $dataSetName = "..." . substr $DataSet, ($maxDataSetNameLength - 3);
         } else {
             $dataSetName = $DataSet;
         }
-		my $Sheet = $Book->add_worksheet("$SheetName - $dataSetName");
-		my @Headings = split " ", shift @{$Data{$DataSet}};
+        my $Sheet = $Book->add_worksheet("$SheetName - $dataSetName");
+        my @Headings = split " ", shift @{$Data{$DataSet}};
 
         my $HeadingColumn = 0;
         my @HeadingColour;
@@ -977,27 +977,27 @@ sub DisplayMultiData {
             # Now translate the short heading name into a more meaningful heading
             #
             if (defined $TranslateHeading{$Heading}){
-				#
-				# Special case 'tps' as is can occur in sar -b or -d listings
-				#
-				if ($Heading =~ /tps/){
-					$Heading = "Device " . $TranslateHeading{$Heading};
-				} else {
-					$Heading = $TranslateHeading{$Heading};
-				}
-			}
+                #
+                # Special case 'tps' as is can occur in sar -b or -d listings
+                #
+                if ($Heading =~ /tps/){
+                    $Heading = "Device " . $TranslateHeading{$Heading};
+                } else {
+                    $Heading = $TranslateHeading{$Heading};
+                }
+            }
             $HeadingColumn++;
         }
-		my $NumberOfFields = @Headings;
-		my $CurrentRow = 2;
-		my $StatLine;
-		for $StatLine (@{$Data{$DataSet}}) {
-			FillRow($Sheet, $CurrentRow, $NumberOfFields, $StatLine, \%ThisSheetAmberThresholds, \%ThisSheetRedThresholds, \@HeadingColour);
-			$CurrentRow++;
-		}
+        my $NumberOfFields = @Headings;
+        my $CurrentRow = 2;
+        my $StatLine;
+        for $StatLine (@{$Data{$DataSet}}) {
+            FillRow($Sheet, $CurrentRow, $NumberOfFields, $StatLine, \%ThisSheetAmberThresholds, \%ThisSheetRedThresholds, \@HeadingColour);
+            $CurrentRow++;
+        }
         FillHeaderRow($Sheet, $NumberOfFields, \@Headings, \@HeadingColour);
         $Sheet->set_column(0, $NumberOfFields - 1, 10);
-	}
+    }
 }
 
 #-------------------------------------------------------------------------------
@@ -1011,15 +1011,15 @@ sub DisplayMultiData {
 # Returns:      Nothing
 #-------------------------------------------------------------------------------
 sub DisplayCPUData {
-	my ($Book) = @_;
+    my ($Book) = @_;
 
-	my $Sheet = $Book->add_worksheet("CPU - all");
+    my $Sheet = $Book->add_worksheet("CPU - all");
 
-	my @CPUData = ReadCPUStats();
-	#
-	# First row of @CPUData is the headings in the sar file
-	#
-	my @Headings = split " ", shift @CPUData;
+    my @CPUData = ReadCPUStats();
+    #
+    # First row of @CPUData is the headings in the sar file
+    #
+    my @Headings = split " ", shift @CPUData;
 
         my $HeadingColumn = 0;
         my @HeadingColour;
@@ -1045,15 +1045,15 @@ sub DisplayCPUData {
             $Heading = $TranslateHeading{$Heading} if defined $TranslateHeading{$Heading};
             $HeadingColumn++;
         }
-	my $NumberOfFields = @Headings;
-	my $CurrentRow = 2;
-	my ($CPULine, $Value);
-	for $CPULine (@CPUData) {
-		FillRow($Sheet, $CurrentRow, $NumberOfFields, $CPULine, \%ThisSheetAmberThresholds, \%ThisSheetRedThresholds, \@HeadingColour);
-		$CurrentRow++;
-	}
-	FillHeaderRow($Sheet, $NumberOfFields, \@Headings, \@HeadingColour);
-	$Sheet->set_column(0, $NumberOfFields - 1, 10);
+    my $NumberOfFields = @Headings;
+    my $CurrentRow = 2;
+    my ($CPULine, $Value);
+    for $CPULine (@CPUData) {
+        FillRow($Sheet, $CurrentRow, $NumberOfFields, $CPULine, \%ThisSheetAmberThresholds, \%ThisSheetRedThresholds, \@HeadingColour);
+        $CurrentRow++;
+    }
+    FillHeaderRow($Sheet, $NumberOfFields, \@Headings, \@HeadingColour);
+    $Sheet->set_column(0, $NumberOfFields - 1, 10);
 }
 
 #-------------------------------------------------------------------------------
@@ -1175,106 +1175,106 @@ sub FillRow {
 # Returns:      An array of CPU data read from the sar file
 #-------------------------------------------------------------------------------
 sub ReadCPUStats {
-	my (@CPUData, $utilisation);
-	#
-	# Parse states
-	#
-	my $StillLooking = TRUE;
-	my $ReadingData = FALSE;
-	my $HeadingFound = FALSE;
-	#
-	my $CPUHeadingLine;
-	my $TwelveHourclock = FALSE;
-	my ($time, $AMorPM, $cpu, @fields);
-	#
-	# Use FoundAny as a flag to indicate if we've found any of the section we're looking
-	# for. If we've rebooted then the data might be in several places in the sar file
-	#
-	my $FoundAny = FALSE;
-	#
-	# Reposition ourselves to the start of the file
-	#
-	seek INFILE, 0, 0;
-	while (<INFILE>){
-		chomp;
-		if ($StillLooking){
-			if (/%nice\s+%sys/){
-				$HeadingFound = TRUE;
-				$CPUHeadingLine = $_;
-				$CPUHeadingLine =~ s/CPU//;
-				if ($CPUHeadingLine =~ /[A|P]M/){
-					$CPUHeadingLine =~ s/[A|P]M//;
-					$TwelveHourclock = TRUE;
-				}
+    my (@CPUData, $utilisation);
+    #
+    # Parse states
+    #
+    my $StillLooking = TRUE;
+    my $ReadingData = FALSE;
+    my $HeadingFound = FALSE;
+    #
+    my $CPUHeadingLine;
+    my $TwelveHourclock = FALSE;
+    my ($time, $AMorPM, $cpu, @fields);
+    #
+    # Use FoundAny as a flag to indicate if we've found any of the section we're looking
+    # for. If we've rebooted then the data might be in several places in the sar file
+    #
+    my $FoundAny = FALSE;
+    #
+    # Reposition ourselves to the start of the file
+    #
+    seek INFILE, 0, 0;
+    while (<INFILE>){
+        chomp;
+        if ($StillLooking){
+            if (/%nice\s+%sys/){
+                $HeadingFound = TRUE;
+                $CPUHeadingLine = $_;
+                $CPUHeadingLine =~ s/CPU//;
+                if ($CPUHeadingLine =~ /[A|P]M/){
+                    $CPUHeadingLine =~ s/[A|P]M//;
+                    $TwelveHourclock = TRUE;
+                }
                 $CPUHeadingLine =~ s/\d{2}:\d{2}:\d{2}//;
-				$CPUHeadingLine = "Time " . $CPUHeadingLine . " %utilisation";
-				$StillLooking = FALSE;
-			} else {
-				$HeadingFound = FALSE;
-			}
-		} elsif ($HeadingFound){
-			if ($TwelveHourclock){
-				($time, $AMorPM, $cpu, @fields) = split;
-				if ($AMorPM =~ /AM/){
-					my ($hour, $minute, $second) = split /:/, $time;
-					$hour = 0 if $hour == 12;
-					$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);						
-				} elsif ($AMorPM =~ /PM/){
-					my ($hour, $minute, $second) = split /:/, $time;
-					$hour += 12 if $hour < 12;
-					$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
-				}
-			} else {
-				($time, $cpu, @fields) = split;
-			}
-			if ($cpu ne "all"){
-				$HeadingFound = FALSE;
-				$StillLooking = TRUE;
-			} else {
-				$ReadingData = TRUE;
-				$HeadingFound = FALSE;
-				$StillLooking = FALSE;
-				#
-				# Calculate the %utilisation (100-%idle)
-				#
-				push @fields, sprintf ("%.2f", 100-$fields[$#fields]);
-				push @CPUData, $CPUHeadingLine if !$FoundAny;
-				$FoundAny = TRUE;
-				push @CPUData, [($time, @fields)] if InTimeRange($time);
-			}
-		} elsif ($ReadingData){
-			#
-			# Ignore blank lines, CPU header lines and Average lines
-			#
-			next if (/%nice\s+%sys/) or (/^\s*$/);
-			if (/^Average/){
-				$ReadingData = FALSE;
-				$StillLooking = TRUE;
-			} else {
-				if ($TwelveHourclock){
-					($time, $AMorPM, $cpu, @fields) = split;
-					if ($AMorPM =~ /AM/){
-						my ($hour, $minute, $second) = split /:/, $time;
-						$hour = 0 if $hour == 12;
-						$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);						
-					} elsif ($AMorPM =~ /PM/){
-						my ($hour, $minute, $second) = split /:/, $time;
-						$hour += 12 if $hour < 12;
-						$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
-					}
-				} else {
-					($time, $cpu, @fields) = split;
-				}
-				next if $cpu ne "all";
-				#
-				# Calculate the %utilisation (100-%idle)
-				#
-				push @fields, sprintf ("%.2f", 100-$fields[$#fields]);
-				push @CPUData, [($time, @fields)] if InTimeRange($time);
-			}
-		}
-	}
-	return @CPUData;
+                $CPUHeadingLine = "Time " . $CPUHeadingLine . " %utilisation";
+                $StillLooking = FALSE;
+            } else {
+                $HeadingFound = FALSE;
+            }
+        } elsif ($HeadingFound){
+            if ($TwelveHourclock){
+                ($time, $AMorPM, $cpu, @fields) = split;
+                if ($AMorPM =~ /AM/){
+                    my ($hour, $minute, $second) = split /:/, $time;
+                    $hour = 0 if $hour == 12;
+                    $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);                     
+                } elsif ($AMorPM =~ /PM/){
+                    my ($hour, $minute, $second) = split /:/, $time;
+                    $hour += 12 if $hour < 12;
+                    $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
+                }
+            } else {
+                ($time, $cpu, @fields) = split;
+            }
+            if ($cpu ne "all"){
+                $HeadingFound = FALSE;
+                $StillLooking = TRUE;
+            } else {
+                $ReadingData = TRUE;
+                $HeadingFound = FALSE;
+                $StillLooking = FALSE;
+                #
+                # Calculate the %utilisation (100-%idle)
+                #
+                push @fields, sprintf ("%.2f", 100-$fields[$#fields]);
+                push @CPUData, $CPUHeadingLine if !$FoundAny;
+                $FoundAny = TRUE;
+                push @CPUData, [($time, @fields)] if InTimeRange($time);
+            }
+        } elsif ($ReadingData){
+            #
+            # Ignore blank lines, CPU header lines and Average lines
+            #
+            next if (/%nice\s+%sys/) or (/^\s*$/);
+            if (/^Average/){
+                $ReadingData = FALSE;
+                $StillLooking = TRUE;
+            } else {
+                if ($TwelveHourclock){
+                    ($time, $AMorPM, $cpu, @fields) = split;
+                    if ($AMorPM =~ /AM/){
+                        my ($hour, $minute, $second) = split /:/, $time;
+                        $hour = 0 if $hour == 12;
+                        $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);                     
+                    } elsif ($AMorPM =~ /PM/){
+                        my ($hour, $minute, $second) = split /:/, $time;
+                        $hour += 12 if $hour < 12;
+                        $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
+                    }
+                } else {
+                    ($time, $cpu, @fields) = split;
+                }
+                next if $cpu ne "all";
+                #
+                # Calculate the %utilisation (100-%idle)
+                #
+                push @fields, sprintf ("%.2f", 100-$fields[$#fields]);
+                push @CPUData, [($time, @fields)] if InTimeRange($time);
+            }
+        }
+    }
+    return @CPUData;
 }
 
 #-------------------------------------------------------------------------------
@@ -1285,74 +1285,74 @@ sub ReadCPUStats {
 # Returns:      An array of data read from the sar file
 #-------------------------------------------------------------------------------
 sub ReadStats {
-	my ($MatchString) = @_;
-	my @Data;
-	my $TwelveHourclock = FALSE;
-	my ($time, $AMorPM, @fields);
-	#
-	# Parse states
-	#
-	my $StillLooking = TRUE;
-	my $ReadingData = FALSE;
-	#
-	# Use FoundAny as a flag to indicate if we've found any of the section we're looking
-	# for. If we've rebooted then the data might be in several places in the sar file
-	#
-	my $FoundAny = FALSE;
-	#
-	# Reposition ourselves to the start of the file
-	#
-	seek INFILE, 0, 0;
-	while (<INFILE>){
-		chomp;
-		if ($StillLooking){
-			if (/$MatchString/){
+    my ($MatchString) = @_;
+    my @Data;
+    my $TwelveHourclock = FALSE;
+    my ($time, $AMorPM, @fields);
+    #
+    # Parse states
+    #
+    my $StillLooking = TRUE;
+    my $ReadingData = FALSE;
+    #
+    # Use FoundAny as a flag to indicate if we've found any of the section we're looking
+    # for. If we've rebooted then the data might be in several places in the sar file
+    #
+    my $FoundAny = FALSE;
+    #
+    # Reposition ourselves to the start of the file
+    #
+    seek INFILE, 0, 0;
+    while (<INFILE>){
+        chomp;
+        if ($StillLooking){
+            if (/$MatchString/){
                 my $HeadingLine = $_;
-				if ($HeadingLine =~ /[A|P]M/){
-					$HeadingLine =~ s/[A|P]M//;
-					$TwelveHourclock = TRUE;
-				}
+                if ($HeadingLine =~ /[A|P]M/){
+                    $HeadingLine =~ s/[A|P]M//;
+                    $TwelveHourclock = TRUE;
+                }
                 my @temp = split /\s+/, $HeadingLine;
                 shift @temp;    # Get rid of the 00:00:00 in the header line
-				push @Data, [("Time", @temp)] if !$FoundAny;
-				$FoundAny = TRUE;
-				$ReadingData = TRUE;
-				$StillLooking = FALSE;
-			} else {
-				$ReadingData = FALSE;
-			}
-		} elsif ($ReadingData){
-			#
-			# Ignore header and blank lines
-			#
-			next if (/$MatchString/) or (/^\s*$/);
-			#
-			# See if we've reached the end of this lot of data - might not be the
-			# only lot if we have a reboot
-			#
-			if (/^Average/){
-				$ReadingData = FALSE;
-				$StillLooking = TRUE;
-			} else {
-				if ($TwelveHourclock){
-					($time, $AMorPM, @fields) = split;
-					if ($AMorPM =~ /AM/){
-						my ($hour, $minute, $second) = split /:/, $time;
-						$hour = 0 if $hour == 12;
-						$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);						
-					} elsif ($AMorPM =~ /PM/){
-						my ($hour, $minute, $second) = split /:/, $time;
-						$hour += 12 if $hour < 12;
-						$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
-					}
-				}else{
-					($time, @fields) = split;
-				}
-				push @Data, [($time, @fields)] if InTimeRange($time);
-			}
-		}
-	}
-	return @Data;
+                push @Data, [("Time", @temp)] if !$FoundAny;
+                $FoundAny = TRUE;
+                $ReadingData = TRUE;
+                $StillLooking = FALSE;
+            } else {
+                $ReadingData = FALSE;
+            }
+        } elsif ($ReadingData){
+            #
+            # Ignore header and blank lines
+            #
+            next if (/$MatchString/) or (/^\s*$/);
+            #
+            # See if we've reached the end of this lot of data - might not be the
+            # only lot if we have a reboot
+            #
+            if (/^Average/){
+                $ReadingData = FALSE;
+                $StillLooking = TRUE;
+            } else {
+                if ($TwelveHourclock){
+                    ($time, $AMorPM, @fields) = split;
+                    if ($AMorPM =~ /AM/){
+                        my ($hour, $minute, $second) = split /:/, $time;
+                        $hour = 0 if $hour == 12;
+                        $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);                     
+                    } elsif ($AMorPM =~ /PM/){
+                        my ($hour, $minute, $second) = split /:/, $time;
+                        $hour += 12 if $hour < 12;
+                        $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
+                    }
+                }else{
+                    ($time, @fields) = split;
+                }
+                push @Data, [($time, @fields)] if InTimeRange($time);
+            }
+        }
+    }
+    return @Data;
 }
 
 #-------------------------------------------------------------------------------
@@ -1365,77 +1365,77 @@ sub ReadStats {
 #               instance in the group of stats.
 #-------------------------------------------------------------------------------
 sub ReadMultiStats {
-	my ($MatchString) = @_;
-	my (%Data, $HeadingLine);
-	my $TwelveHourclock = FALSE;
-	my ($time, $AMorPM, $variable, @fields);
-	#
-	# Parse states
-	#
-	my $StillLooking = TRUE;
-	my $ReadingData = FALSE;
-	#
-	# Reposition ourselves to the start of the file
-	#
-	seek INFILE, 0, 0;
-	while (<INFILE>){
-		chomp;
-		if ($StillLooking){
-			if (/$MatchString/){
-				$HeadingLine = $_;
+    my ($MatchString) = @_;
+    my (%Data, $HeadingLine);
+    my $TwelveHourclock = FALSE;
+    my ($time, $AMorPM, $variable, @fields);
+    #
+    # Parse states
+    #
+    my $StillLooking = TRUE;
+    my $ReadingData = FALSE;
+    #
+    # Reposition ourselves to the start of the file
+    #
+    seek INFILE, 0, 0;
+    while (<INFILE>){
+        chomp;
+        if ($StillLooking){
+            if (/$MatchString/){
+                $HeadingLine = $_;
                 $HeadingLine =~ s/\d{2}:\d{2}:\d{2}//;
-				if ($HeadingLine =~ /[A|P]M/){
-					$HeadingLine =~ s/[A|P]M//;
-					$TwelveHourclock = TRUE;
-				}
-				#
-				# Strip out the 2nd heading
-				#
-				my @temp = split /\s+/, $HeadingLine;
-				splice @temp, 1, 1;
-				$HeadingLine = "Time " . join " ", @temp;
-				$ReadingData = TRUE;
-				$StillLooking = FALSE;
-			} else {
-				$ReadingData = FALSE;
-			}
-		} elsif ($ReadingData){
-			#
-			# Ignore header and blank lines
-			#
-			next if (/$MatchString/) or (/^\s*$/);
-			if (/^Average/){
-				$ReadingData = FALSE;
-				$StillLooking = TRUE;
-			} else {
-				if ($TwelveHourclock){
-					($time, $AMorPM, $variable, @fields) = split;
-					if ($AMorPM =~ /AM/){
-						my ($hour, $minute, $second) = split /:/, $time;
-						$hour = 0 if $hour == 12;
-						$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);						
-					} elsif ($AMorPM =~ /PM/){
-						my ($hour, $minute, $second) = split /:/, $time;
-						$hour += 12 if $hour < 12;
-						$time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
-					}
-				} else {
-					($time, $variable, @fields) = split;
-				}
-				#
-				# Translate device name using a device map if appropriate
-				#
-				if ($MatchString eq "DEV"){
-					if (defined $DeviceMap{$variable}){
-						$variable = $DeviceMap{$variable};
-					}
-				}
-				push @{$Data{$variable}}, $HeadingLine if !(defined $Data{$variable});
-				push @{$Data{$variable}}, [($time, @fields)] if InTimeRange($time);
-			}
-		}
-	}
-	return %Data;
+                if ($HeadingLine =~ /[A|P]M/){
+                    $HeadingLine =~ s/[A|P]M//;
+                    $TwelveHourclock = TRUE;
+                }
+                #
+                # Strip out the 2nd heading
+                #
+                my @temp = split /\s+/, $HeadingLine;
+                splice @temp, 1, 1;
+                $HeadingLine = "Time " . join " ", @temp;
+                $ReadingData = TRUE;
+                $StillLooking = FALSE;
+            } else {
+                $ReadingData = FALSE;
+            }
+        } elsif ($ReadingData){
+            #
+            # Ignore header and blank lines
+            #
+            next if (/$MatchString/) or (/^\s*$/);
+            if (/^Average/){
+                $ReadingData = FALSE;
+                $StillLooking = TRUE;
+            } else {
+                if ($TwelveHourclock){
+                    ($time, $AMorPM, $variable, @fields) = split;
+                    if ($AMorPM =~ /AM/){
+                        my ($hour, $minute, $second) = split /:/, $time;
+                        $hour = 0 if $hour == 12;
+                        $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);                     
+                    } elsif ($AMorPM =~ /PM/){
+                        my ($hour, $minute, $second) = split /:/, $time;
+                        $hour += 12 if $hour < 12;
+                        $time = sprintf("%02d:%02d:%02d", $hour, $minute, $second);
+                    }
+                } else {
+                    ($time, $variable, @fields) = split;
+                }
+                #
+                # Translate device name using a device map if appropriate
+                #
+                if ($MatchString eq "DEV"){
+                    if (defined $DeviceMap{$variable}){
+                        $variable = $DeviceMap{$variable};
+                    }
+                }
+                push @{$Data{$variable}}, $HeadingLine if !(defined $Data{$variable});
+                push @{$Data{$variable}}, [($time, @fields)] if InTimeRange($time);
+            }
+        }
+    }
+    return %Data;
 }
 
 #-------------------------------------------------------------------------------
@@ -1446,15 +1446,15 @@ sub ReadMultiStats {
 # Returns:      True if $ThisTimeInSeconds is between $BeginTimeInSeconds and $EndTimeInSeconds
 #-------------------------------------------------------------------------------
 sub InTimeRange {
-	my ($ThisTime) = @_;
-	
-	$ThisTime =~ /(\d{2}):(\d{2}):(\d{2})/;
-	my $ThisTimeInSeconds = $1*3600 + $2*60 + $3;
-	if (($BeginTimeInSeconds < $ThisTimeInSeconds) && ($ThisTimeInSeconds < $EndTimeInSeconds)) {
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+    my ($ThisTime) = @_;
+    
+    $ThisTime =~ /(\d{2}):(\d{2}):(\d{2})/;
+    my $ThisTimeInSeconds = $1*3600 + $2*60 + $3;
+    if (($BeginTimeInSeconds < $ThisTimeInSeconds) && ($ThisTimeInSeconds < $EndTimeInSeconds)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 #-------------------------------------------------------------------------------
 # Subroutine:   PrintUsage
@@ -1463,19 +1463,19 @@ sub InTimeRange {
 # Returns:      Nothing
 #-------------------------------------------------------------------------------
 sub PrintUsage {
-	print "\nusage: sar2xls [-f sar_file | -a] [-t threshold_file] [-D directory] [-b begin_time -e end_time] [-o output_file] [-m] [-V]\n\n";
-	print "Where:\n";
-	print "    -V prints the version of sar2xls\n";
-	print "    -f Specifies the sar text file to process (excluding the directory path)\n";
-	print "    -a Specifies all sar files in current or specified folder\n";
-	print "    -t Optional threshold file for colour-coding cells\n";
-	print "    -D Optional directory to use for input and output (default is the current directory)\n";
-	print "    -b Begin Time\n";
-	print "    -e End Time\n";
-	print "    -m Indicates to break out per-CPU stats rather than the average for all CPUs\n";
-	print "    -o Specifies an optional output file name (default is hostname-date)\n\n";
-	print "     e.g.  sar2xls -f sar05 -D /path/to/sarfile -b 10:22:30 -e 10:45:00 \n";
-	print "           sar2xls -a -D /var/log/sa\n\n";
+    print "\nusage: sar2xls [-f sar_file | -a] [-t threshold_file] [-D directory] [-b begin_time -e end_time] [-o output_file] [-m] [-V]\n\n";
+    print "Where:\n";
+    print "    -V prints the version of sar2xls\n";
+    print "    -f Specifies the sar text file to process (excluding the directory path)\n";
+    print "    -a Specifies all sar files in current or specified folder\n";
+    print "    -t Optional threshold file for colour-coding cells\n";
+    print "    -D Optional directory to use for input and output (default is the current directory)\n";
+    print "    -b Begin Time\n";
+    print "    -e End Time\n";
+    print "    -m Indicates to break out per-CPU stats rather than the average for all CPUs\n";
+    print "    -o Specifies an optional output file name (default is hostname-date)\n\n";
+    print "     e.g.  sar2xls -f sar05 -D /path/to/sarfile -b 10:22:30 -e 10:45:00 \n";
+    print "           sar2xls -a -D /var/log/sa\n\n";
 
-	exit;
+    exit;
 }

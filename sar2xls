@@ -56,8 +56,9 @@
 #				4.2		06-Mar-12	Special case 'tps' in ReadMultiStats for compatibility with GenGraphs.pl
 #				4.3		07-Mar-12	Changed the regex that identifies the first line of a sar file to include 'Linux'
 #				4.4		27-Apr-12	Bugfix of devmap file processing of ASM volumes
+#               4.5     22-Jul-13   Bugfix of maximum sheet name length being exceeded by some long network device names (eg __tmp1398450821)
 #
-use constant VERSION => 4.4;
+use constant VERSION => 4.5;
 #
 #-------------------------------------------------------------------------------
 use strict;
@@ -800,7 +801,7 @@ for my $SarFile (@SarFileList){
     DisplayData("Sockets", SOCKETS, $Book) if $HeaderFound{+SOCKETS};
     DisplayData("Load Average", RUN_QUEUE, $Book) if $HeaderFound{+RUN_QUEUE};
     DisplayMultiData("Network", NETWORK, $Book) if $HeaderFound{+NETWORK};
-    DisplayMultiData("Network Errors", NETWORK_ERRORS, $Book) if $HeaderFound{+NETWORK_ERRORS};
+    DisplayMultiData("Net Errors", NETWORK_ERRORS, $Book) if $HeaderFound{+NETWORK_ERRORS};
 	DisplayData("NFS Client", NFS_CLIENT, $Book) if $HeaderFound{+NFS_CLIENT};
 	DisplayData("NFS Server", NFS_SERVER, $Book) if $HeaderFound{+NFS_SERVER};
 	DisplayData("IPv4", IP, $Book) if $HeaderFound{+IP};
@@ -941,9 +942,17 @@ sub DisplayMultiData {
 	my ($SheetName, $MatchString, $Book) = @_;
 
 	my %Data = ReadMultiStats($MatchString);
-
+    my $initialSheetNameLength = length($SheetName) + length(" - ");
+    my $maxDataSetNameLength = 31 - $initialSheetNameLength;
+    my $dataSetName;
+    
 	foreach my $DataSet (keys %Data) {
-		my $Sheet = $Book->add_worksheet("$SheetName - $DataSet");
+        if (length($DataSet) > $maxDataSetNameLength) {
+            $dataSetName = "..." . substr $DataSet, ($maxDataSetNameLength - 3);
+        } else {
+            $dataSetName = $DataSet;
+        }
+		my $Sheet = $Book->add_worksheet("$SheetName - $dataSetName");
 		my @Headings = split " ", shift @{$Data{$DataSet}};
 
         my $HeadingColumn = 0;

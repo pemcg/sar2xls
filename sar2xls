@@ -57,8 +57,9 @@
 #               4.3     07-Mar-12   Changed the regex that identifies the first line of a sar file to include 'Linux'
 #               4.4     27-Apr-12   Bugfix of devmap file processing of ASM volumes
 #               4.5     22-Jul-13   Bugfix of maximum sheet name length being exceeded by some long network device names (eg __tmp1398450821)
+#               4.6     11-Dec-13   Freeze the column heading row to stop it scrolling off-screen
 #
-use constant VERSION => 4.5;
+use constant VERSION => 4.6;
 #
 #-------------------------------------------------------------------------------
 use strict;
@@ -924,6 +925,7 @@ sub DisplayData {
     }
     FillHeaderRow($Sheet, $NumberOfFields, \@{$Headings}, \@HeadingColour);
     $Sheet->set_column(0, $NumberOfFields - 1, 10);
+    $Sheet->freeze_panes(1, 0); # Freeze the first row
 }
 
 #-------------------------------------------------------------------------------
@@ -997,6 +999,7 @@ sub DisplayMultiData {
         }
         FillHeaderRow($Sheet, $NumberOfFields, \@Headings, \@HeadingColour);
         $Sheet->set_column(0, $NumberOfFields - 1, 10);
+        $Sheet->freeze_panes(1, 0); # Freeze the first row
     }
 }
 
@@ -1054,6 +1057,7 @@ sub DisplayCPUData {
     }
     FillHeaderRow($Sheet, $NumberOfFields, \@Headings, \@HeadingColour);
     $Sheet->set_column(0, $NumberOfFields - 1, 10);
+    $Sheet->freeze_panes(1, 0); # Freeze the first row
 }
 
 #-------------------------------------------------------------------------------

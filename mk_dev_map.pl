@@ -32,7 +32,9 @@ sub AddToDeviceMap {
 }
 
 %DeviceMap = (%DeviceMap, AddToDeviceMap("sd\*", qr|\/dev\/([\w-]+)|, "dev~"));
+%DeviceMap = (%DeviceMap, AddToDeviceMap("vd\*", qr|\/dev\/([\w-]+)|, "dev~"));
 %DeviceMap = (%DeviceMap, AddToDeviceMap("md\*", qr|\/dev\/([\w-]+)|, "dev~"));
+%DeviceMap = (%DeviceMap, AddToDeviceMap("dm\*", qr|\/dev\/([\w-]+)|, "dev~"));
 %DeviceMap = (%DeviceMap, AddToDeviceMap("emcpower\*", qr|\/dev\/([\w-]+)|, "emcpower~"));
 %DeviceMap = (%DeviceMap, AddToDeviceMap("mapper/\*", qr|\/dev\/mapper\/([\w-]+)|, "mapper~"));
 %DeviceMap = (%DeviceMap, AddToDeviceMap("cciss/\*", qr|\/dev\/cciss\/([\w-]+)|, "cciss~"));

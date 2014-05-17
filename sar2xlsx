@@ -16,8 +16,8 @@
 #  You should have Recv'd a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Description:  sar2xls reads a sar text file and converts it to Excel .xls
-#               spreadsheet format using the Spreadsheet::WriteExcel module
+# Description:  sar2xlsx reads a sar text file and converts it to Excel .xlsx
+#               spreadsheet format using the Excel::Writer::XLSX module
 #
 #
 # Revision History
@@ -58,13 +58,15 @@
 #               4.4     27-Apr-12   Bugfix of devmap file processing of ASM volumes
 #               4.5     22-Jul-13   Bugfix of maximum sheet name length being exceeded by some long network device names (eg __tmp1398450821)
 #               4.6     11-Dec-13   Freeze the column heading row to stop it scrolling off-screen
+#               4.7     17-May-14   Forked this version to sar2xlsx, uses Excel::Writer::XLSX rather than Spreadsheet::WriteExcel,
+#                                   creates xlsx format spreadsheets. Removed compatibility_mode as it's deprecated.
 #
-use constant VERSION => 4.6;
+use constant VERSION => 4.7;
 #
 #-------------------------------------------------------------------------------
 use strict;
 use Getopt::Std;
-use Spreadsheet::WriteExcel;
+use Excel::Writer::XLSX;
 use constant FALSE => 0x0;
 use constant TRUE => 0x1;
 #
@@ -539,7 +541,7 @@ our ($opt_h, $opt_f, $opt_a, $opt_t, $opt_D, $opt_b, $opt_e, $opt_o, $opt_m, $op
 our ($Directory, $BeginTimeInSeconds, $EndTimeInSeconds, $OutputFile);
 
 if (defined $opt_V) {
-    print "sar2xls Version: " . VERSION . "\n";
+    print "sar2xlsx Version: " . VERSION . "\n";
     exit;
 }
 if (defined $opt_h) {
@@ -690,21 +692,16 @@ for my $SarFile (@SarFileList){
     if (defined $opt_o){
         $OutputFile = $opt_o;
     } else {
-        $OutputFile = "$ServerShortName-$StatsDate.xls";
+        $OutputFile = "$ServerShortName-$StatsDate.xlsx";
     }
     #
     # Create a new Excel workbook
     #
-    my $Book = Spreadsheet::WriteExcel->new("$Directory/$OutputFile");
+    my $Book = Excel::Writer::XLSX->new("$Directory/$OutputFile");
     if (!defined $Book) {
         print "Exiting...\n";
         exit;
     }
-    #
-    # Set "compatibility_mode to stop "File Error: data may have been lost"
-    # Msgs when using thresholds files and Office 2003 SP3 and later
-    #
-    $Book->compatibility_mode(); 
     #
     # Give ourselves an initial worksheet
     #
@@ -1467,9 +1464,9 @@ sub InTimeRange {
 # Returns:      Nothing
 #-------------------------------------------------------------------------------
 sub PrintUsage {
-    print "\nusage: sar2xls [-f sar_file | -a] [-t threshold_file] [-D directory] [-b begin_time -e end_time] [-o output_file] [-m] [-V]\n\n";
+    print "\nusage: sar2xlsx [-f sar_file | -a] [-t threshold_file] [-D directory] [-b begin_time -e end_time] [-o output_file] [-m] [-V]\n\n";
     print "Where:\n";
-    print "    -V prints the version of sar2xls\n";
+    print "    -V prints the version of sar2xlsx\n";
     print "    -f Specifies the sar text file to process (excluding the directory path)\n";
     print "    -a Specifies all sar files in current or specified folder\n";
     print "    -t Optional threshold file for colour-coding cells\n";
@@ -1478,8 +1475,8 @@ sub PrintUsage {
     print "    -e End Time\n";
     print "    -m Indicates to break out per-CPU stats rather than the average for all CPUs\n";
     print "    -o Specifies an optional output file name (default is hostname-date)\n\n";
-    print "     e.g.  sar2xls -f sar05 -D /path/to/sarfile -b 10:22:30 -e 10:45:00 \n";
-    print "           sar2xls -a -D /var/log/sa\n\n";
+    print "     e.g.  sar2xlsx -f sar05 -D /path/to/sarfile -b 10:22:30 -e 10:45:00 \n";
+    print "           sar2xlsx -a -D /var/log/sa\n\n";
 
     exit;
 }

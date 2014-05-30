@@ -58,7 +58,7 @@
 #               4.4     27-Apr-12   Bugfix of devmap file processing of ASM volumes
 #               4.5     22-Jul-13   Bugfix of maximum sheet name length being exceeded by some long network device names (eg __tmp1398450821)
 #               4.6     11-Dec-13   Freeze the column heading row to stop it scrolling off-screen
-#               4.7     17-May-14   Forked this version to sar2xlsx, uses Excel::Writer::XLSX rather than Spreadsheet::WriteExcel,
+#               4.7     17-May-14   Forked sar2xls to sar2xlsx, uses Excel::Writer::XLSX rather than Spreadsheet::WriteExcel,
 #                                   creates xlsx format spreadsheets. Removed compatibility_mode as it's deprecated.
 #
 use constant VERSION => 4.7;
